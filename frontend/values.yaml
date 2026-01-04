@@ -1,0 +1,56 @@
+replicaCount: 1
+
+image:
+  repository: tic-tac-toe-frontend
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: false
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Global config reference
+globalConfig:
+  name: global-config-config
+  namespace: default
+  wsUrl: "ws://gateway.tic-tac-toe.local"
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 80
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations: {}
+  hosts:
+    - host: tic-tac-toe.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+

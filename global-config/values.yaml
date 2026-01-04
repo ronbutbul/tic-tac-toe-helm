@@ -1,0 +1,35 @@
+# Global configuration values for all Tic-Tac-Toe services
+
+# Kafka Configuration
+kafka:
+  bootstrapServers: "kafka:9092"
+  movesTopic: "game-moves"
+  stateTopic: "game-state-updates"
+
+# MongoDB Configuration
+mongodb:
+  url: "mongodb://mongodb:27017"
+  dbName: "admin"
+  useAuth: false
+  username: ""
+  password: ""
+
+# Service-specific configurations
+services:
+  gameLogic:
+    consumerGroup: "game-logic-service"
+  
+  gateway:
+    consumerGroup: "gateway-service-state-consumer"
+    host: "0.0.0.0"
+    port: "9000"
+    # WebSocket URL for frontend (will be set via ingress)
+    wsUrl: "ws://gateway.tic-tac-toe.local"
+  
+  archive:
+    consumerGroup: "archive-service"
+  
+  statistics:
+    host: "0.0.0.0"
+    port: "8000"
+

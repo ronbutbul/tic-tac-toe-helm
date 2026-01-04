@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "global-config.fullname" . }}-config
+  labels:
+    {{- include "global-config.labels" . | nindent 4 }}
+data:
+  # Kafka Configuration
+  KAFKA_BOOTSTRAP_SERVERS: {{ .Values.kafka.bootstrapServers | quote }}
+  KAFKA_MOVES_TOPIC: {{ .Values.kafka.movesTopic | quote }}
+  KAFKA_STATE_TOPIC: {{ .Values.kafka.stateTopic | quote }}
+  
+  # MongoDB Configuration
+  MONGO_URL: {{ .Values.mongodb.url | quote }}
+  MONGO_DB_NAME: {{ .Values.mongodb.dbName | quote }}
+  MONGO_USE_AUTH: {{ .Values.mongodb.useAuth | toString | quote }}
+  {{- if .Values.mongodb.username }}
+  MONGO_USERNAME: {{ .Values.mongodb.username | quote }}
+  {{- end }}
+  {{- if .Values.mongodb.password }}
+  MONGO_PASSWORD: {{ .Values.mongodb.password | quote }}
+  {{- end }}
+  
+  # Game Logic Service
+  KAFKA_CONSUMER_GROUP: {{ .Values.services.gameLogic.consumerGroup | quote }}
+  
+  # Gateway Service
+  GATEWAY_CONSUMER_GROUP: {{ .Values.services.gateway.consumerGroup | quote }}
+  GATEWAY_HOST: {{ .Values.services.gateway.host | quote }}
+  GATEWAY_PORT: {{ .Values.services.gateway.port | quote }}
+  GATEWAY_WS_URL: {{ .Values.services.gateway.wsUrl | quote }}
+  
+  # Archive Service
+  ARCHIVE_CONSUMER_GROUP: {{ .Values.services.archive.consumerGroup | quote }}
+  
+  # Statistics Service
+  STATISTICS_HOST: {{ .Values.services.statistics.host | quote }}
+  STATISTICS_PORT: {{ .Values.services.statistics.port | quote }}
+

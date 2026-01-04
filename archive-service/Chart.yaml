@@ -3,5 +3,5 @@ name: archive-service
 description: Archive Service for Tic-Tac-Toe
 type: application
 version: 0.1.0
-appVersion: "1.0.0"
+appVersion: "20260104-145129-a433d6f4"
 

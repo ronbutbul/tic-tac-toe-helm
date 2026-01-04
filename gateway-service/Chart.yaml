@@ -3,5 +3,5 @@ name: gateway-service
 description: Gateway Service for Tic-Tac-Toe
 type: application
 version: 0.1.0
-appVersion: "1.0.0"
+appVersion: "20260104-151451-4dda5551"
 

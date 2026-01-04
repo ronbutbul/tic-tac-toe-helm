@@ -36,12 +36,9 @@ spec:
               gatewayWsUrl: "$WS_URL"
             };
             EOF
-        env:
-        - name: GATEWAY_WS_URL
-          valueFrom:
-            configMapKeyRef:
-              name: {{ .Values.globalConfig.name }}
-              key: GATEWAY_WS_URL
+        envFrom:
+        - configMapRef:
+            name: {{ .Values.globalConfig.name }}
         volumeMounts:
         - name: shared-config
           mountPath: /shared

@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: tic-tac-toe-archive
   pullPolicy: IfNotPresent
-  tag: "latest"
+  # tag: "latest"
 
 nameOverride: ""
 fullnameOverride: ""

@@ -3,5 +3,5 @@ name: statistics-service
 description: Statistics Service for Tic-Tac-Toe
 type: application
 version: 0.1.0
-appVersion: "1.0.0"
+appVersion: "20260104-151448-4dda5551"
 

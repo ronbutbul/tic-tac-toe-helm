@@ -4,16 +4,9 @@
 controller:
   extraArgs:
     default-ssl-certificate: "general/testmpr-aws-wildcard-cert"
-    http-port: "8080"
-  hostNetwork: true
+  hostNetwork: false
   hostPort:
-    enabled: true
-    ports:
-      # http: 8080
-      https: 443
-  containerPort:
-    # http: 8080
-    https: 443
+    enabled: false
 
   metrics:
     enabled: true
@@ -21,10 +14,6 @@ controller:
   ##
   kind: DaemonSet
   service:
-    targetPorts:
-      # http: 8080
-      https: https
-
     annotations:
       service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
       service.beta.kubernetes.io/aws-load-balancer-internal: "true"

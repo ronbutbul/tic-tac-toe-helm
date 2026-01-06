@@ -1,0 +1,191 @@
+global:
+  imageRegistry: "artifactory.rafael.co.il:6001"
+  imagePullSecrets:
+    - tsinf-reg
+  storageClass: "tsgs-sc"
+  security:
+    allowInsecureImages: true
+
+initdbScripts:
+  tsgsInitDbScript.sh: |
+      #!/bin/sh
+      if [ ! -f /bitnami/mongodb/tsgs-initial-mongo.txt ]; then
+        echo "Starting one-time tsgs mongo configuration"
+        mongosh --host localhost:27017 -u root -p MomgoTsgsAnns --authenticationDatabase admin<<EOF
+        use admin 
+        db.createUser(
+        {
+          user: "mongodb_exporter",
+          pwd: "pass0wd",
+          roles: [ {role: "clusterMonitor", db: "admin"},{role: "read", db: "local"} ],
+          mechanisms:["SCRAM-SHA-1"]
+          }
+        )
+        db.createUser(
+        {
+          user:"tsgsuser",
+          pwd:"tsgspassword",
+          roles: ['userAdminAnyDatabase','readWriteAnyDatabase'],
+          mechanisms:["SCRAM-SHA-1"]
+          }
+        )
+        use tsgsdb     
+        db.createUser(
+        {
+          user:"tsgsuser",
+          pwd:"tsgspassword",
+          roles: ['userAdminAnyDatabase','readWriteAnyDatabase'],
+          mechanisms:["SCRAM-SHA-1"]
+          }
+        )
+        db.TsgsTestCollection.drop()
+        db.createCollection("TsgsTestCollection")
+        db.TsgsTestCollection.insert({date: new ISODate()})
+        use flight-drones-inventories
+        db.TsgsTestCollection.drop()
+        db.createCollection("TsgsTestCollection")
+        db.TsgsTestCollection.insert({date: new ISODate()})
+      EOF
+        touch /bitnami/mongodb/tsgs-initial-mongo.txt
+      else
+        echo "Skipping one-time tsgs mongo configuration"
+      fi
+
+image:
+  registry: docker.io
+  repository: bitnami/mongodb
+  tag: 8.0.13-debian-12-r0
+  pullPolicy: IfNotPresent
+  pullSecrets:
+    - tsinf-reg
+
+auth:
+  enabled: true
+  rootUser: root
+  rootPassword: "MomgoTsgsAnns"
+  usernames: 
+    - tsgsuser
+  passwords: 
+    - tsgspassword
+  databases: 
+    - tsgsdb
+  replicaSetKey: "tsgs1010"
+
+automountServiceAccountToken: true
+replicaSetHostnames: true
+replicaCount: 3
+architecture: replicaset
+useStatefulSet: true
+
+tolerations:
+  - key: "statefulset/special-taint"
+    operator: "Equal"
+affinity:
+  podAntiAffinity:
+   requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+              - mongodb
+        topologyKey: "kubernetes.io/hostname"
+  nodeAffinity:
+   requiredDuringSchedulingIgnoredDuringExecution:
+     nodeSelectorTerms:
+     - matchExpressions:
+       - key: statefulset/special-taint
+         operator: In
+         values:
+         - stateful
+
+initContainers: 
+  - name: init-mongo
+    image: artifactory.rafael.co.il:6001/infra/busybox:1.36.1-uclibc
+    command: ["/bin/sh"]
+    args:
+      - -c
+      - >-
+          rm -rf /bitnami/mongodb/data/db/*.lock &&
+          sysctl -w vm.max_map_count=32621440
+    securityContext:
+      privileged: true
+    # command: ['sh', '-c', "rm -rf /bitnami/mongodb/data/db/*.lock"]
+    # command: ['sh', '-c', "while true; do sleep 30; done;"]
+    volumeMounts:
+      - name: datadir
+        mountPath: /bitnami/mongodb
+sidecars:
+  - name: mongo-labeler
+    image: artifactory.rafael.co.il:6001/infra/pioneerm/k8s-mongo-labeler-sidecar
+    imagePullPolicy: IfNotPresent
+    env:
+      - name: LABEL_SELECTOR
+        value: "app.kubernetes.io/instance=mongo8-rafael-tsgs-dev-mission"
+      - name: NAMESPACE
+        value: "rafael-tsgs-dev-mission"
+      - name: DEBUG
+        value: "true"
+
+extraDeploy:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: mongo8-primary
+    namespace: rafael-tsgs-dev-mission
+
+  spec:
+    type: ClusterIP
+    ports:
+      - name: mongodb
+        port: 27017
+        protocol: TCP
+        targetPort: 27017
+    selector:
+      app.kubernetes.io/instance: mongo8-rafael-tsgs-dev-mission
+      primary: "true"
+
+
+service:
+  type: ClusterIP
+  portName: mongodb
+  ports:
+    mongodb: 27017
+
+
+networkPolicy:
+  enabled: false
+
+
+persistence:
+  enabled: true
+  storageClass: "tsgs-sc"
+  accessModes:
+    - ReadWriteOnce
+  size: 80Gi
+
+rbac:
+  create: true
+  rules:
+    - apiGroups:
+        - ""
+      resources:
+        - pods
+      verbs:
+        - get
+        - list
+        - watch
+        - update
+
+arbiter:
+  enabled: false
+
+metrics:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: bitnami/mongodb-exporter
+    tag: 0.47.0-debian-12-r1
+    pullPolicy: IfNotPresent
+    pullSecrets:
+      - tsinf-reg

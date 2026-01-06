@@ -1,0 +1,46 @@
+image:
+  registry: artifactory.rafael.co.il:6001/ghcr.io
+  repository: kafbat/kafka-ui
+  pullPolicy: IfNotPresent
+  tag: ""
+
+yamlApplicationConfig:
+  # {}
+  kafka:
+    clusters:
+      - name: cicd-flight-bitnami-new
+        bootstrapServers: kafka-rafael-tsgs-cicd-flight:9092
+  spring:
+    security:
+      oauth2:
+  auth:
+    type: disabled
+  management:
+    health:
+      ldap:
+        enabled: false
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  apiVersion: ~
+  path: "/"
+  pathType: "Prefix"
+  host: "kafkaui-bat-cicd-flight-bitnami.tsgs.aws2.rafael.co.il"
+  tls:
+    enabled: true
+    secretName: "tsgs-saas-aws-wildcard-cert"
+
+tolerations: 
+  - key: "statefulset/special-taint"
+    operator: "Equal"
+affinity:
+  nodeAffinity:
+   requiredDuringSchedulingIgnoredDuringExecution:
+     nodeSelectorTerms:
+     - matchExpressions:
+       - key: statefulset/special-taint
+         operator: In
+         values:
+         - stateful

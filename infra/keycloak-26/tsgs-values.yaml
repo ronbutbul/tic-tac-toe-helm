@@ -1,0 +1,94 @@
+global:
+  imageRegistry: "artifactory.rafael.co.il:6001"
+  imagePullSecrets:
+    - tsinf-reg
+  defaultStorageClass: tsgs-sc
+
+  security:
+    allowInsecureImages: true
+
+image:
+  registry: docker.io
+  repository: bitnamilegacy/keycloak
+  tag: 26.3.3-debian-12-r0
+
+
+tolerations:
+  - key: "statefulset/special-taint"
+    operator: "Equal"
+affinity:
+  nodeAffinity:
+   requiredDuringSchedulingIgnoredDuringExecution:
+     nodeSelectorTerms:
+     - matchExpressions:
+       - key: statefulset/special-taint
+         operator: In
+         values:
+         - stateful
+
+auth:
+  adminUser: admin
+  adminPassword: "admin"
+  passwordSecretKey: ""
+
+extraEnvVars:
+  - name: KEYCLOAK_ADMIN
+    value: admin
+  - name: KEYCLOAK_ADMIN_PASSWORD
+    value: admin
+  - name: KC_PROXY_HEADERS
+    value: "xforwarded" 
+  - name: KC_PROXY
+    value: "edge"
+  - name: KC_HOSTNAME
+    value: "keycloak.tsgs.aws2.rafael.co.il"
+service:
+  type : ClusterIP
+  http:
+    enabled: true
+  ports:
+    http: 80
+    https: 8443
+  nodePorts:
+    http: "30080"
+    https: "30443"
+
+httpRelativePath: "/auth/"
+
+ingress:
+  enabled: false
+tls: 
+  enabled: false
+
+
+postgresql:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/postgresql
+    tag: 17.6.0-debian-12-r0
+
+  primary:
+    tolerations:
+    - key: "statefulset/special-taint"
+      operator: "Equal"
+    # persistence:
+    #   existingClaim: "data-keycloak-23-0-4-postgresql"  
+    affinity:
+      nodeAffinity:
+       requiredDuringSchedulingIgnoredDuringExecution:
+         nodeSelectorTerms:
+         - matchExpressions:
+           - key: statefulset/special-taint
+             operator: In
+             values:
+             - stateful  
+  auth:
+    postgresPassword: "ioKk0gVfYV"  
+    username: bn_keycloak
+    password: "e4zKtPSSgE"
+    database: bitnami_keycloak
+logging:
+  output: default
+  level: INFO
+

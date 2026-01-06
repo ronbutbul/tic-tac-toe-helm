@@ -1,0 +1,137 @@
+global:
+  image:
+    repository: artifactory.rafael.co.il:6001/argocd
+    tag: "v2.11.7"
+    imagePullPolicy: IfNotPresent
+  imagePullSecrets: 
+  - name: tsinf-registry
+
+  tolerations:
+    - key: "statefulset/special-taint"
+      operator: "Equal"
+  affinity:
+    nodeAffinity:
+     requiredDuringSchedulingIgnoredDuringExecution:
+       nodeSelectorTerms:
+       - matchExpressions:
+         - key: statefulset/special-taint
+           operator: In
+           values:
+           - stateful
+
+## Argo Configs
+configs:
+  cm:
+    create: true
+    exec.enabled: true
+
+  params:
+    create: true
+    server.insecure: true
+
+  repositories:
+      tsgs-infra-argocd:
+        url: https://gitlab.rafael.co.il/tsgs/cloudops/tsgs-infra-argocd.git
+        password: zZCvnF1E22Xb6VZR-NRS
+        username: svc_tsgs_gitlab_pat
+      tsgs-infra:
+        url: https://gitlab.rafael.co.il/tsgs/cloudops/tsgs-infra.git
+        password: zZCvnF1E22Xb6VZR-NRS
+        username: svc_tsgs_gitlab_pat
+
+## Application controller
+controller:
+  affinity:
+    nodeAffinity:
+     requiredDuringSchedulingIgnoredDuringExecution:
+       nodeSelectorTerms:
+       - matchExpressions:
+         - key: statefulset/special-taint
+           operator: In
+           values:
+           - stateful
+
+## Dex
+dex:
+  enabled: false
+
+## Redis
+redis:
+  enabled: true
+  image:
+    repository: artifactory.rafael.co.il:6001/public.ecr.aws/docker/library/redis
+    tag: 7.2.4-alpine
+    imagePullPolicy: ""
+  imagePullSecrets:
+      - name: "tsinf-registry"
+  affinity:
+    nodeAffinity:
+     requiredDuringSchedulingIgnoredDuringExecution:
+       nodeSelectorTerms:
+       - matchExpressions:
+         - key: statefulset/special-taint
+           operator: In
+           values:
+           - stateful
+
+## Server
+server:
+  replicas: 3
+  extraArgs:
+    - --rootpath=/argo-cd
+    - --insecure
+    - --enable-gzip
+  affinity:
+    nodeAffinity:
+     requiredDuringSchedulingIgnoredDuringExecution:
+       nodeSelectorTerms:
+       - matchExpressions:
+         - key: statefulset/special-taint
+           operator: In
+           values:
+           - stateful   
+  service:
+    type: ClusterIP
+  ingress:
+    enabled: true
+    hostname: "infra.tsgs-saas-aws.wwest.local"
+    ingressClassName: "nginx"
+    path: /argo-cd
+
+## Repo Server
+repoServer:
+  affinity:
+    nodeAffinity:
+     requiredDuringSchedulingIgnoredDuringExecution:
+       nodeSelectorTerms:
+       - matchExpressions:
+         - key: statefulset/special-taint
+           operator: In
+           values:
+           - stateful           
+
+
+## ApplicationSet controller
+applicationSet:
+  affinity:
+    nodeAffinity:
+     requiredDuringSchedulingIgnoredDuringExecution:
+       nodeSelectorTerms:
+       - matchExpressions:
+         - key: statefulset/special-taint
+           operator: In
+           values:
+           - stateful
+
+## Notifications controller
+notifications:
+  affinity:
+    nodeAffinity:
+     requiredDuringSchedulingIgnoredDuringExecution:
+       nodeSelectorTerms:
+       - matchExpressions:
+         - key: statefulset/special-taint
+           operator: In
+           values:
+           - stateful   
+

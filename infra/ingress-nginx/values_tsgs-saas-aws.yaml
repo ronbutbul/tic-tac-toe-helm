@@ -1,0 +1,140 @@
+## nginx configuration
+## Ref: https://github.com/kubernetes/ingress-nginx/blob/master/controllers/nginx/configuration.md
+##
+controller:
+  extraArgs:
+    default-ssl-certificate: "general/tsgs-saas-aws-wildcard-cert"
+    http-port: "8080"
+  image:
+    repository: artifactory.rafael.co.il:6001/registry.k8s.io/ingress-nginx/controller       
+    digest: "" #"sha256:4dc5e07c8ca4e23bddb3153737d7b8c556e5fb2f29c4558b7cd6e6df99c512c7"
+  hostNetwork: true
+  hostPort:
+    enabled: true
+    ports:
+      # http: 8080
+      https: 443
+  containerPort:
+    # http: 8080
+    https: 443
+
+  metrics:
+    enabled: true
+  tolerations:
+    - key: "statefulset/special-taint"
+      operator: "Equal"
+  affinity:
+    nodeAffinity:
+     requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: statefulset/special-taint
+          operator: In
+          values:
+          - stateful
+
+
+
+  ## DaemonSet or Deployment
+  ##
+  kind: DaemonSet
+  service:
+    targetPorts:
+      # http: 8080
+      https: https
+
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+      service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "8000"
+      service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags: "AutoTag_AccountId=084375561449,AutoTag_CreateTime=2025-08-13T10:52:03Z,AutoTag_Creator=arn:aws:sts::084375561449:assumed-role/AmazonEKSLoadBalancerControllerRole/1755583759507977498,AutoTag_CreatorUserName=1755583759507977498"
+    enableHttps: true
+    enableHttp: true
+    type: LoadBalancer
+    # type: ClusterIP
+    # type: NodePort
+
+    nodePorts:
+      http: 32080
+      https: 32443
+      # tcp:
+      #   8080: 32808
+  admissionWebhooks:
+    patch:
+      image:
+        repository: artifactory.rafael.co.il:6001/registry.k8s.io/ingress-nginx/kube-webhook-certgen
+        digest: "sha256:fe821886866f174069dbb1e3af741662efb44952e39d66488d1fb811673440b7"
+  nodeSelector: {}
+defaultBackend:
+  ##
+  enabled: true
+  image:
+    repository: artifactory.rafael.co.il:6001/registry.k8s.io/defaultbackend-amd64
+
+  tolerations:
+    - key: "statefulset/special-taint"
+      operator: "Equal"
+  affinity:
+    nodeAffinity:
+     requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: statefulset/special-taint
+          operator: In
+          values:
+          - stateful
+
+
+imagePullSecrets:
+- name: tsinf-reg
+tcp: 
+#  8080: "default/example-tcp-svc:9000"
+## Kafka Bitnami 3.4.0 TCP Configurations ##
+  9081: "rafael-tsgs-dev-mission/kafka-rafael-tsgs-dev-mission-controller-0-external:9081"
+  9082: "rafael-tsgs-dev-mission/kafka-rafael-tsgs-dev-mission-controller-1-external:9081"
+  9083: "rafael-tsgs-dev-mission/kafka-rafael-tsgs-dev-mission-controller-2-external:9081"  
+
+  9084: "rafael-tsgs-test-flight/kafka-rafael-tsgs-test-flight-controller-0-external:9084"
+  9085: "rafael-tsgs-test-flight/kafka-rafael-tsgs-test-flight-controller-1-external:9084"
+  9086: "rafael-tsgs-test-flight/kafka-rafael-tsgs-test-flight-controller-2-external:9084"   
+
+  9087: "rafael-tsgs-test-mission/kafka-rafael-tsgs-test-mission-controller-0-external:9087"
+  9088: "rafael-tsgs-test-mission/kafka-rafael-tsgs-test-mission-controller-1-external:9087"
+  9089: "rafael-tsgs-test-mission/kafka-rafael-tsgs-test-mission-controller-2-external:9087"   
+
+  9092: "rafael-tsgs-cicd-mission/kafka-rafael-tsgs-cicd-mission-controller-0-external:9092"
+  9093: "rafael-tsgs-cicd-mission/kafka-rafael-tsgs-cicd-mission-controller-1-external:9092"
+  9094: "rafael-tsgs-cicd-mission/kafka-rafael-tsgs-cicd-mission-controller-2-external:9092"  
+
+  9095: "rafael-tsgs-cicd-flight/kafka-rafael-tsgs-cicd-flight-controller-0-external:9095"
+  9096: "rafael-tsgs-cicd-flight/kafka-rafael-tsgs-cicd-flight-controller-1-external:9095"
+  9097: "rafael-tsgs-cicd-flight/kafka-rafael-tsgs-cicd-flight-controller-2-external:9095"
+
+  9071: "rafael-tsgs-cicd-flight/kafka-rafael-trainer-backend-controller-0-external:9071"
+  9072: "rafael-tsgs-cicd-flight/kafka-rafael-trainer-backend-controller-1-external:9071"
+  9073: "rafael-tsgs-cicd-flight/kafka-rafael-trainer-backend-controller-2-external:9071"
+
+
+
+## MongoDB-8 ##
+  27028: "rafael-tsgs-cicd-flight/mongo8-primary:27017"
+  27029: "rafael-tsgs-cicd-mission/mongo8-primary:27017"  
+  27024: "rafael-tsgs-test-mission/mongo8-primary:27017"  
+  27057: "rafael-tsgs-dev-mission/mongo8-primary:27017"  
+  27067: "rafael-tsgs-test-flight/mongo8-primary:27017"  
+
+
+
+# jaeger 3.4.0 
+  4317: "rafael-tsgs-cicd-flight/jaeger-340-rafael-tsgs-cicd-flight-collector:4317"
+  4327: "rafael-tsgs-cicd-mission/jaeger-340-rafael-tsgs-cicd-mission-collector:4317"
+  4337: "rafael-tsgs-dev-mission/jaeger-340-rafael-tsgs-dev-mission-collector:4317"
+  4347: "rafael-tsgs-test-mission/jaeger-340-rafael-tsgs-test-mission-collector:4317"
+  4357: "rafael-tsgs-test-flight/jaeger-340-rafael-tsgs-test-mission-collector:4317"
+  4367: "rafael-adlg-cicd/jaeger-340-rafael-adlg-cicd-collector:4317"
+# # N8s-Debug-Tools
+  3000: general/n8sdebug-n8s-debugtools:3000
+
+# Postgresql 16
+  5432: "rafael-tsgs-cicd-flight/cicd-flight-cluster-pg-rw:5432"
+

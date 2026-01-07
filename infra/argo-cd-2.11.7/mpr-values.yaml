@@ -1,0 +1,36 @@
+configs:
+  cm:
+    create: true
+    exec.enabled: true
+
+  params:
+    create: true
+    server.insecure: true
+
+dex:
+  enabled: false
+
+redis:
+  enabled: true
+
+server:
+  replicas: 1
+  extraArgs:
+    - --rootpath=/argo-cd
+    - --insecure
+    - --enable-gzip
+
+  service:
+    type: NodePort
+    nodePortHttp: 30080
+    nodePortHttps: 30443
+    
+  ingress:
+    enabled: true
+    hostname: "infra.testmpr.aws2.rafael.co.il"
+    ingressClassName: "nginx"
+    path: /argo-cd
+    tls:
+      - hosts:
+        - "infra.testmpr.aws2.rafael.co.il"
+        secretName: testmpr-aws-wildcard-cert

@@ -3,7 +3,7 @@
 ##
 controller:
   extraArgs:
-    default-ssl-certificate: "general/testmpr-aws-wildcard-cert"
+    default-ssl-certificate: "default/testmpr-aws-wildcard-cert"
     http-port: "9001"
     default-server-port: "8089"
   hostNetwork: true

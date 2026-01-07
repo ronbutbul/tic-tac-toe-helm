@@ -38,7 +38,7 @@ spec:
             EOF
         envFrom:
         - configMapRef:
-            name: {{ .Values.globalConfig.name }}
+              name: {{ .Values.globalConfig.name }}
         volumeMounts:
         - name: shared-config
           mountPath: /shared

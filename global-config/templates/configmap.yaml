@@ -36,4 +36,4 @@ data:
   # Statistics Service
   STATISTICS_HOST: {{ .Values.services.statistics.host | quote }}
   STATISTICS_PORT: {{ .Values.services.statistics.port | quote }}
-
+  

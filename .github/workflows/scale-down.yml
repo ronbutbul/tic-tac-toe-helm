@@ -23,6 +23,26 @@ jobs:
           sudo mv kubectl /usr/local/bin/kubectl
           kubectl version --client
 
+      - name: Install AWS CLI
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
+          aws --version
+
+      - name: Configure AWS credentials
+        run: |
+          mkdir -p "$HOME/.aws"
+          cat > "$HOME/.aws/credentials" << EOF
+[il-mpr]
+aws_access_key_id = ${{ secrets.AWS_ACCESS_KEY_ID }}
+aws_secret_access_key = ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+EOF
+          cat > "$HOME/.aws/config" << EOF
+[profile il-mpr]
+region = il-central-1
+EOF
+
       - name: Write kubeconfig from secret
         run: |
           mkdir -p "$HOME/.kube"

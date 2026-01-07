@@ -25,9 +25,7 @@ jobs:
       - name: Write kubeconfig from secret
         run: |
           mkdir -p "$HOME/.kube"
-          cat << 'EOF' > "$HOME/.kube/config"
-${{ secrets.EKS_KUBECONFIG }}
-EOF
+          echo "${{ secrets.EKS_KUBECONFIG }}" > "$HOME/.kube/config"
           chmod 600 "$HOME/.kube/config"
 
       - name: Verify cluster connection

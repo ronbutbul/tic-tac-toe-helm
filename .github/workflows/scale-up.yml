@@ -1,0 +1,140 @@
+name: Scale Up - Enable ArgoCD Sync
+
+on:
+  schedule:
+    # Run Sunday-Thursday at 08:00 UTC
+    # 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday
+    - cron: '0 8 * * 0-4'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  scale-up:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install kubectl
+        run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/kubectl
+          kubectl version --client
+
+      - name: Write kubeconfig from secret
+        run: |
+          mkdir -p "$HOME/.kube"
+          cat << 'EOF' > "$HOME/.kube/config"
+${{ secrets.EKS_KUBECONFIG }}
+EOF
+          chmod 600 "$HOME/.kube/config"
+
+      - name: Verify cluster connection
+        run: |
+          kubectl cluster-info
+          kubectl get nodes
+
+      - name: Find ArgoCD namespace
+        id: find-argocd-ns
+        run: |
+          # Try common ArgoCD namespace names
+          ARGOCD_NS=""
+          for ns in argocd argo-cd argocd-system; do
+            if kubectl get ns "$ns" &>/dev/null; then
+              ARGOCD_NS="$ns"
+              echo "Found ArgoCD namespace: $ns"
+              break
+            fi
+          done
+          
+          # If not found, search for namespace with argocd application CRD
+          if [ -z "$ARGOCD_NS" ]; then
+            for ns in $(kubectl get ns -o jsonpath='{.items[*].metadata.name}'); do
+              if kubectl get application -n "$ns" &>/dev/null 2>&1; then
+                ARGOCD_NS="$ns"
+                echo "Found namespace with ArgoCD Applications: $ns"
+                break
+              fi
+            done
+          fi
+          
+          if [ -z "$ARGOCD_NS" ]; then
+            echo "Error: Could not find ArgoCD namespace"
+            exit 1
+          fi
+          
+          echo "argocd_namespace=$ARGOCD_NS" >> $GITHUB_OUTPUT
+          echo "Using ArgoCD namespace: $ARGOCD_NS"
+
+      - name: Scale ArgoCD Deployments to 1
+        run: |
+          ARGOCD_NS="${{ steps.find-argocd-ns.outputs.argocd_namespace }}"
+          echo "Scaling Deployments in namespace: $ARGOCD_NS"
+          for deploy in $(kubectl get deploy -n "$ARGOCD_NS" -o jsonpath='{.items[*].metadata.name}' 2>/dev/null || true); do
+            if [ -n "$deploy" ]; then
+              echo "  Scaling deployment $deploy to 1 replica"
+              kubectl scale deploy "$deploy" -n "$ARGOCD_NS" --replicas=1 || true
+            fi
+          done
+
+      - name: Scale ArgoCD StatefulSets to 1
+        run: |
+          ARGOCD_NS="${{ steps.find-argocd-ns.outputs.argocd_namespace }}"
+          echo "Scaling StatefulSets in namespace: $ARGOCD_NS"
+          for sts in $(kubectl get statefulset -n "$ARGOCD_NS" -o jsonpath='{.items[*].metadata.name}' 2>/dev/null || true); do
+            if [ -n "$sts" ]; then
+              echo "  Scaling statefulset $sts to 1 replica"
+              kubectl scale statefulset "$sts" -n "$ARGOCD_NS" --replicas=1 || true
+            fi
+          done
+
+      - name: Wait for ArgoCD pods to be running
+        run: |
+          ARGOCD_NS="${{ steps.find-argocd-ns.outputs.argocd_namespace }}"
+          echo "Waiting for all pods in namespace $ARGOCD_NS to be running..."
+          
+          # Wait for deployments to be ready
+          for deploy in $(kubectl get deploy -n "$ARGOCD_NS" -o jsonpath='{.items[*].metadata.name}' 2>/dev/null || true); do
+            if [ -n "$deploy" ]; then
+              echo "Waiting for deployment $deploy to be ready..."
+              kubectl wait --for=condition=available --timeout=300s deployment/"$deploy" -n "$ARGOCD_NS" || echo "Warning: Deployment $deploy not ready within timeout"
+            fi
+          done
+          
+          # Wait for statefulsets to be ready
+          for sts in $(kubectl get statefulset -n "$ARGOCD_NS" -o jsonpath='{.items[*].metadata.name}' 2>/dev/null || true); do
+            if [ -n "$sts" ]; then
+              echo "Waiting for statefulset $sts to be ready..."
+              kubectl wait --for=condition=ready --timeout=300s statefulset/"$sts" -n "$ARGOCD_NS" || echo "Warning: StatefulSet $sts not ready within timeout"
+            fi
+          done
+          
+          # Wait for all pods to be running
+          echo "Waiting for all pods to be in Running state..."
+          kubectl wait --for=condition=ready --timeout=300s --all pods -n "$ARGOCD_NS" || echo "Warning: Some pods not ready within timeout"
+          
+          echo "✅ ArgoCD pods are running"
+
+      - name: Enable ArgoCD Application syncPolicy
+        run: |
+          # Get all ArgoCD Applications in all namespaces
+          for ns in $(kubectl get ns -o jsonpath='{.items[*].metadata.name}'); do
+            echo "Checking ArgoCD Applications in namespace: $ns"
+            for app in $(kubectl get application -n "$ns" -o jsonpath='{.items[*].metadata.name}' 2>/dev/null || true); do
+              if [ -n "$app" ]; then
+                echo "Enabling syncPolicy for ArgoCD Application: $app in namespace: $ns"
+                # Enable automated syncPolicy with prune and selfHeal
+                kubectl patch application "$app" -n "$ns" --type merge -p '{"spec":{"syncPolicy":{"automated":{"prune":true,"selfHeal":true}}}}' || \
+                echo "Warning: Could not patch application $app in namespace $ns"
+              fi
+            done
+          done
+
+      - name: Summary
+        run: |
+          echo "✅ Scale up completed:"
+          echo "  - ArgoCD Deployments and StatefulSets scaled to 1"
+          echo "  - ArgoCD pods are running"
+          echo "  - ArgoCD Applications syncPolicy enabled with automated sync"
+

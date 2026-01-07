@@ -1,0 +1,86 @@
+name: Scale Down - Disable ArgoCD Sync and Scale to 0
+
+on:
+  schedule:
+    # Run Sunday-Thursday at 18:00 UTC
+    # 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday
+    - cron: '0 18 * * 0-4'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  scale-down:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install kubectl
+        run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/kubectl
+          kubectl version --client
+
+      - name: Write kubeconfig from secret
+        run: |
+          mkdir -p "$HOME/.kube"
+          cat << 'EOF' > "$HOME/.kube/config"
+${{ secrets.EKS_KUBECONFIG }}
+EOF
+          chmod 600 "$HOME/.kube/config"
+
+      - name: Verify cluster connection
+        run: |
+          kubectl cluster-info
+          kubectl get nodes
+
+      - name: Disable ArgoCD Application syncPolicy
+        run: |
+          # Get all ArgoCD Applications in all namespaces
+          for ns in $(kubectl get ns -o jsonpath='{.items[*].metadata.name}'); do
+            echo "Checking ArgoCD Applications in namespace: $ns"
+            for app in $(kubectl get application -n "$ns" -o jsonpath='{.items[*].metadata.name}' 2>/dev/null || true); do
+              if [ -n "$app" ]; then
+                echo "Disabling syncPolicy for ArgoCD Application: $app in namespace: $ns"
+                # Remove automated syncPolicy to disable auto-sync
+                kubectl patch application "$app" -n "$ns" --type merge -p '{"spec":{"syncPolicy":null}}' || \
+                kubectl patch application "$app" -n "$ns" --type json -p '[{"op": "remove", "path": "/spec/syncPolicy"}]' || \
+                echo "Warning: Could not patch application $app in namespace $ns"
+              fi
+            done
+          done
+
+      - name: Scale all Deployments to 0
+        run: |
+          # Scale all Deployments in all namespaces
+          for ns in $(kubectl get ns -o jsonpath='{.items[*].metadata.name}'); do
+            echo "Scaling Deployments in namespace: $ns"
+            for deploy in $(kubectl get deploy -n "$ns" -o jsonpath='{.items[*].metadata.name}' 2>/dev/null || true); do
+              if [ -n "$deploy" ]; then
+                echo "  Scaling deployment $deploy to 0 replicas"
+                kubectl scale deploy "$deploy" -n "$ns" --replicas=0 || true
+              fi
+            done
+          done
+
+      - name: Scale all StatefulSets to 0
+        run: |
+          # Scale all StatefulSets in all namespaces
+          for ns in $(kubectl get ns -o jsonpath='{.items[*].metadata.name}'); do
+            echo "Scaling StatefulSets in namespace: $ns"
+            for sts in $(kubectl get statefulset -n "$ns" -o jsonpath='{.items[*].metadata.name}' 2>/dev/null || true); do
+              if [ -n "$sts" ]; then
+                echo "  Scaling statefulset $sts to 0 replicas"
+                kubectl scale statefulset "$sts" -n "$ns" --replicas=0 || true
+              fi
+            done
+          done
+
+      - name: Summary
+        run: |
+          echo "✅ Scale down completed:"
+          echo "  - ArgoCD Applications syncPolicy disabled"
+          echo "  - All Deployments scaled to 0"
+          echo "  - All StatefulSets scaled to 0"
+

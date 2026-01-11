@@ -40,7 +40,7 @@ listeners:
 
   external:
     containerPort: 9095
-    protocol: SSL
+    protocol: PLAINTEXT
     name: EXTERNAL
     sslClientAuth: "none"
 

@@ -1,5 +1,4 @@
 storageClasses:
-# Add StorageClass resources like:
 - name: efs-sc
   annotations:
     # Use that annotation if you want this to your default storageclass
@@ -12,7 +11,7 @@ storageClasses:
     gidRangeEnd: "2000"
     basePath: "/dynamic_provisioning"
     subPathPattern: "/subPath"
-    ensureUniqueDirectory: true
+    ensureUniqueDirectory: "true"
   reclaimPolicy: Delete
   volumeBindingMode: Immediate
 

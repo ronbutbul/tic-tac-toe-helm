@@ -3,7 +3,7 @@ global:
   # imagePullSecrets:
   #   - tsgs-registry
   defaultStorageClass: ""
-  storageClass: "tsgs-sc"
+  storageClass: "efs-sc"
   security:
     allowInsecureImages: true
 

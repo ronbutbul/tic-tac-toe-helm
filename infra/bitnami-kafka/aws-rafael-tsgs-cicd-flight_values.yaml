@@ -1,22 +1,22 @@
 global:
-  imageRegistry: "artifactory.rafael.co.il:6001"
-  imagePullSecrets:
-    - tsgs-registry
+  # imageRegistry: "artifactory.rafael.co.il:6001"
+  # imagePullSecrets:
+  #   - tsgs-registry
   defaultStorageClass: ""
   storageClass: "tsgs-sc"
   security:
     allowInsecureImages: true
 
 
-image:
-  registry: artifactory.rafael.co.il:6001
-  repository: bitnami/kafka
-  tag: 4.0.0-debian-12-r10
-  digest: ""
-  pullPolicy: IfNotPresent
-  pullSecrets:
-    - tsgs-registry
-  debug: true
+# image:
+#   registry: artifactory.rafael.co.il:6001
+#   repository: bitnami/kafka
+#   tag: 4.0.0-debian-12-r10
+#   digest: ""
+#   pullPolicy: IfNotPresent
+#   pullSecrets:
+#     - tsgs-registry
+#   debug: true
 
 ##
 listeners:
@@ -40,7 +40,7 @@ listeners:
 
   external:
     containerPort: 9095
-    protocol: SSL
+    protocol: PLAINTEXT
     name: EXTERNAL
     sslClientAuth: "none"
 
@@ -69,36 +69,7 @@ controller:
     create: false
     minAvailable: ""
     maxUnavailable: 1
-  tolerations:
-    - key: "statefulset/special-taint"
-      operator: "Equal"
-  affinity:    
-    nodeAffinity:
-     requiredDuringSchedulingIgnoredDuringExecution:
-       nodeSelectorTerms:
-       - matchExpressions:
-         - key: statefulset/special-taint
-           operator: In
-           values:
-           - stateful
-
-  # livenessProbe:
-  #   enabled: true
-  #   initialDelaySeconds: 60
-  #   timeoutSeconds: 20
-  #   failureThreshold: 3
-  #   periodSeconds: 20
-  #   successThreshold: 1
-
-  # readinessProbe:
-  #   enabled: true
-  #   initialDelaySeconds: 60
-  #   failureThreshold: 6
-  #   timeoutSeconds: 20
-  #   periodSeconds: 20
-  #   successThreshold: 1
-
-
+ 
 service:
   type: ClusterIP
   ports:
@@ -117,7 +88,7 @@ externalAccess:
       type: ClusterIP
       ports:
         external: 9095
-      domain: "kafka.tsgs.aws2.rafael.co.il"
+      domain: "kafka.testmpr.aws2.rafael.co.il"
   # broker:
   #   service:
   #     type: ClusterIP
@@ -136,7 +107,7 @@ rbac:
 
 serviceMonitor:
     enabled: true
-    jobLabel: "cicd-flight"
+    jobLabel: "mpr"
 
 metrics:
   jmx:

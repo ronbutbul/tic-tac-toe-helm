@@ -15,3 +15,8 @@ storageClasses:
   reclaimPolicy: Delete
   volumeBindingMode: Immediate
 
+serviceAccount:
+  create: true
+  name: efs-csi-controller-sa
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::941284018955:role/efscontroller

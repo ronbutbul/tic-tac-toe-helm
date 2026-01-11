@@ -1,4 +1,8 @@
-
+image:
+  registry: docker.io
+  repository: ronbutbul135/kafka-ui
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
 
 yamlApplicationConfig:
   # {}

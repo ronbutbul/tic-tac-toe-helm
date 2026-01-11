@@ -20,7 +20,7 @@ sidecars:
     imagePullPolicy: IfNotPresent
     env:
       - name: LABEL_SELECTOR
-        value: "app.kubernetes.io/instance=mongo8-default"
+        value: "app.kubernetes.io/instance=mongo8"
       - name: NAMESPACE
         value: "default"
       - name: DEBUG

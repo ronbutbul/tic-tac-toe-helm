@@ -52,7 +52,7 @@ tcp:
 ## Kafka Bitnami 3.4.0 TCP Configurations ##
 
 ## MongoDB-8 ##
-  27017: "infra/mongo8-primary:27017"
+  27017: "default/mongo8-primary:27017"
 
 
 

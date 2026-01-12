@@ -17,7 +17,7 @@ spec:
               revision: main
               directories:
                 - path: '*'
-                - path: 'infra/*'
+                - path: 'infra'
                   exclude: true
                 - path: 'applicationsets'
                   exclude: true                  

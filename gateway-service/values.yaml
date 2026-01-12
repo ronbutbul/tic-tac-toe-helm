@@ -45,11 +45,6 @@ service:
 ingress:
   enabled: true
   className: "nginx"
-  annotations:
-    # WebSocket support annotations
-    nginx.ingress.kubernetes.io/websocket-services: "{{ include "gateway-service.fullname" . }}"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
   hosts:
     - host: gateway.tic-tac-toe.local
       paths:

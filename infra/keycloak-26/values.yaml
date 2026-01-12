@@ -1267,6 +1267,10 @@ postgresql:
     secretKeys:
       userPasswordKey: password
   architecture: standalone
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/postgresql
+    tag: 17.6.0-debian-12-r0  
 ## External PostgreSQL configuration
 ## All of these values are only used when postgresql.enabled is set to false
 ## @param externalDatabase.host Database host

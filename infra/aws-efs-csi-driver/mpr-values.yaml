@@ -17,7 +17,7 @@ storageClasses:
 - name: mongo-sc
   annotations:
     # Use that annotation if you want this to your default storageclass
-    storageclass.kubernetes.io/is-default-class: "true"
+    # storageclass.kubernetes.io/is-default-class: "true"
   parameters:
     provisioningMode: efs-ap
     fileSystemId: fs-093a1db32153f8479

@@ -56,7 +56,8 @@ ingress:
         - path: /
           pathType: Prefix
   tls:
-    host: game.testmpr.aws2.rafael.co.il
+    hosts:
+      - game.testmpr.aws2.rafael.co.il
     enabled: true
     secretName: "testmpr-aws-wildcard-cert"
 

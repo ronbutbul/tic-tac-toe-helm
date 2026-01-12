@@ -51,7 +51,7 @@ ingress:
   className: "nginx"
   annotations: {}
   hosts:
-    - host: tic-tac-toe.local
+    - host: game.testmpr.aws2.rafael.co.il
       paths:
         - path: /
           pathType: Prefix

@@ -47,11 +47,11 @@ ingress:
   className: "nginx"
   annotations: {}
   hosts:
-    - host: statistics.testmpr.aws2.rafael.co.il.testmpr.aws2.rafael.co.il
+    - host: statistics.testmpr.aws2.rafael.co.il
       paths:
         - path: /
           pathType: Prefix
   tls:
     - secretName: testmpr-aws-wildcard-cert
       hosts:
-        - statistics.testmpr.aws2.rafael.co.il.testmpr.aws2.rafael.co.il
+        - statistics.testmpr.aws2.rafael.co.il

@@ -24,7 +24,7 @@ ingress:
   enabled: true
   annotations:
     kubernetes.io/ingress.class: nginx
-  apiVersion: ~
+  ingressClassName: "nginx"
   path: "/"
   pathType: "Prefix"
   host: "kafkaui.testmpr.aws2.rafael.co.il"

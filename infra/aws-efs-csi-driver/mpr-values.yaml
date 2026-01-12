@@ -14,12 +14,12 @@ storageClasses:
     ensureUniqueDirectory: "true"
   reclaimPolicy: Delete
   volumeBindingMode: Immediate
-- name: efs-sc
+- name: mongo-sc
   annotations:
     # Use that annotation if you want this to your default storageclass
     storageclass.kubernetes.io/is-default-class: "true"
   parameters:
-    provisioningMode: mongo-sc
+    provisioningMode: efs-ap
     fileSystemId: fs-093a1db32153f8479
     directoryPerms: "750"
     gidRangeStart: "1001"

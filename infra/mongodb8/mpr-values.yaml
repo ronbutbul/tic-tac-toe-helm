@@ -9,6 +9,9 @@ replicaCount: 3
 architecture: replicaset
 useStatefulSet: true
 
+auth:
+  enabled: false
+
 image:
   registry: docker.io
   repository: bitnamilegacy/mongodb

@@ -23,7 +23,7 @@ storageClasses:
     fileSystemId: fs-093a1db32153f8479
     directoryPerms: "750"
     gidRangeStart: "1001"
-    gidRangeEnd: "1001"
+    gidRangeEnd: "1002"
     basePath: "/dynamic_provisioning"
     subPathPattern: "/subPath"
     ensureUniqueDirectory: "true"

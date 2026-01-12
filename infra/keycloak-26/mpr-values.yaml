@@ -45,7 +45,9 @@ ingress:
   ingressClassName: "nginx"
   tls: true
   # extraTls: []
-  secrets: testmpr-aws-wildcard-cert
+  secrets: 
+    - name: testmpr-aws-wildcard-cert
+  
 
 postgresql:
   enabled: true

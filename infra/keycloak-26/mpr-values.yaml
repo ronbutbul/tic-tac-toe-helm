@@ -36,18 +36,17 @@ service:
     http: "30080"
     https: "30443"
 
-httpRelativePath: "/auth/"
+
 
 ingress:
   enabled: true
-  pathType: ImplementationSpecific
-  hostname: keycloak.testmpr.aws2.rafael.co.il
   ingressClassName: "nginx"
-  tls: true
-  # extraTls: []
-  secrets: 
-    - name: testmpr-aws-wildcard-cert
-  
+  hostname: keycloak.testmpr.aws2.rafael.co.il
+  extraTls:
+  - hosts:
+      - keycloak.testmpr.aws2.rafael.co.il
+    secretName: testmpr-aws-wildcard-cert
+ 
 
 postgresql:
   enabled: true

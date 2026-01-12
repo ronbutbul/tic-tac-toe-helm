@@ -23,6 +23,21 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       initContainers:
+      - name: copy-files
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        command: ['sh', '-c']
+        args:
+          - |
+            # List what's in the image
+            echo "Files in image /usr/share/nginx/html:"
+            ls -la /usr/share/nginx/html/ || true
+            # Copy files from nginx html directory to shared volume
+            cp -r /usr/share/nginx/html/* /shared/ 2>&1 || true
+            echo "Files copied to /shared:"
+            ls -la /shared/
+        volumeMounts:
+        - name: shared-config
+          mountPath: /shared
       - name: inject-config
         image: {{ .Values.inject.image }}
         command: ['sh', '-c']
@@ -36,6 +51,7 @@ spec:
               gatewayWsUrl: "$WS_URL"
             };
             EOF
+            ls -la /shared/
         envFrom:
         - configMapRef:
               name: {{ .Values.globalConfig.name }}

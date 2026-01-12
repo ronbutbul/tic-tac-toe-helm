@@ -44,7 +44,7 @@ extraDeploy:
         protocol: TCP
         targetPort: 27017
     selector:
-      app.kubernetes.io/instance: mongo8-default
+      app.kubernetes.io/instance: mongo8
       primary: "true"
 
 

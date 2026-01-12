@@ -46,9 +46,11 @@ ingress:
   enabled: true
   className: "nginx"
   hosts:
-    - host: gateway.tic-tac-toe.local
+    - host: gateway.testmpr.aws2.rafael.co.il
       paths:
         - path: /
           pathType: Prefix
-  tls: []
-
+  tls:
+    - secretName: testmpr-aws-wildcard-cert
+      hosts:
+        - gateway.testmpr.aws2.rafael.co.il

@@ -47,9 +47,11 @@ ingress:
   className: "nginx"
   annotations: {}
   hosts:
-    - host: api.tic-tac-toe.local
+    - host: statistics.testmpr.aws2.rafael.co.il.testmpr.aws2.rafael.co.il
       paths:
         - path: /
           pathType: Prefix
-  tls: []
-
+  tls:
+    - secretName: testmpr-aws-wildcard-cert
+      hosts:
+        - statistics.testmpr.aws2.rafael.co.il.testmpr.aws2.rafael.co.il

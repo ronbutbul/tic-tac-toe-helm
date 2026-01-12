@@ -27,7 +27,7 @@ ingress:
   apiVersion: ~
   path: "/"
   pathType: "Prefix"
-  host: "kafkaui.mprtest.aws2.rafael.co.il"
+  host: "kafkaui.testmpr.aws2.rafael.co.il"
   tls:
     enabled: true
     secretName: "testmpr-aws-wildcard-cert"

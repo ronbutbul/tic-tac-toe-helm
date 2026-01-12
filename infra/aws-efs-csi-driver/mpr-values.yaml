@@ -21,12 +21,10 @@ storageClasses:
   parameters:
     provisioningMode: efs-ap
     fileSystemId: fs-093a1db32153f8479
-    directoryPerms: "750"
-    gidRangeStart: "1001"
-    gidRangeEnd: "1002"
-    basePath: "/dynamic_provisioning"
-    subPathPattern: "/subPath"
-    ensureUniqueDirectory: "true"
+    directoryPerms: "755"
+    gid: "1001"
+    uid: "1001"
+    basePath: "/"
   reclaimPolicy: Delete
   volumeBindingMode: Immediate  
 controller:

@@ -1,5 +1,5 @@
 global:
-  storageClass: "efs-sc"
+  storageClass: "mongo-sc"
   security:
     allowInsecureImages: true
 

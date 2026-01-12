@@ -19,7 +19,7 @@ spec:
                 - path: '*'
                 - path: 'infra/*'
                   exclude: true
-                - path: 'applicationsets/*'
+                - path: 'applicationsets'
                   exclude: true                  
  
   template:
@@ -33,7 +33,7 @@ spec:
         path: '{{.path.path}}'
         helm:
           valueFiles:
-          - 'mpr-values.yaml'
+          - 'values.yaml'
       destination:
         server: '{{.url}}'
         # namespace: '{{ if eq .path.basenameNormalized "cloudnative-pg-operator" }}operators{{ else if eq .path.basenameNormalized "minio-operator" }}operators{{ else if eq .path.basenameNormalized "prometheus-stack" }}monitoring{{ else if eq .path.basenameNormalized "eck-operator" }}operators{{ else if eq .path.basenameNormalized "ingress-nginx" }}ingress-nginx{{ else if eq .path.basenameNormalized "csi-driver-nfs" }}nfs-csi{{ else if eq .path.basenameNormalized "postgres-operator" }}operators{{ else }}cymng-infra{{ end }}'

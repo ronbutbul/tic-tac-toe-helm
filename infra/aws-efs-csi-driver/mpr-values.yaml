@@ -14,6 +14,21 @@ storageClasses:
     ensureUniqueDirectory: "true"
   reclaimPolicy: Delete
   volumeBindingMode: Immediate
+- name: efs-sc
+  annotations:
+    # Use that annotation if you want this to your default storageclass
+    storageclass.kubernetes.io/is-default-class: "true"
+  parameters:
+    provisioningMode: mongo-sc
+    fileSystemId: fs-093a1db32153f8479
+    directoryPerms: "750"
+    gidRangeStart: "1001"
+    gidRangeEnd: "1001"
+    basePath: "/dynamic_provisioning"
+    subPathPattern: "/subPath"
+    ensureUniqueDirectory: "true"
+  reclaimPolicy: Delete
+  volumeBindingMode: Immediate  
 controller:
   serviceAccount:
     create: false

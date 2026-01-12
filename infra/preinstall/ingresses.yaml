@@ -1,0 +1,26 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: keycloak-ingress
+  namespace: default
+spec:
+  tls:
+    - hosts:
+      - keycloak.testmpr.aws2.rafael.co.il
+      # This assumes tls-secret exists and the SSL
+      # certificate contains a CN for foo.bar.com
+      secretName: testmpr-aws-wildcard-cert
+  ingressClassName: nginx
+  rules:
+  - host: keycloak.testmpr.aws2.rafael.co.il
+    http:
+      paths:
+      - backend:
+          service:
+            name: keycloak
+            port: 
+              number: 80
+        path: /auth
+        pathType: Prefix
+---

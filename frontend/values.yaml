@@ -5,6 +5,9 @@ image:
   pullPolicy: IfNotPresent
   # tag: "latest"
 
+inject:
+  image: docker.io/library/busybox:latest
+
 nameOverride: ""
 fullnameOverride: ""
 
@@ -40,6 +43,7 @@ globalConfig:
 service:
   type: ClusterIP
   port: 80
+
 
 # Ingress configuration
 ingress:

@@ -24,7 +24,7 @@ spec:
       {{- end }}
       initContainers:
       - name: inject-config
-        image: busybox:latest
+        image: {{ .Values.inject.image }}
         command: ['sh', '-c']
         args:
           - |

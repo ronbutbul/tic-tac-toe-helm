@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: tic-tac-toe-game-logic
+  repository: ronbutbul135/tic-tac-toe-game-logic
   pullPolicy: IfNotPresent
   # tag: "latest"
 

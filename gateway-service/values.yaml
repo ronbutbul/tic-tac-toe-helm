@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: tic-tac-toe-gateway
+  repository: ronbutbul135/tic-tac-toe-gateway
   pullPolicy: IfNotPresent
   # tag: "latest"
 

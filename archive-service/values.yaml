@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: tic-tac-toe-archive
+  repository: ronbutbul135/tic-tac-toe-archive
   pullPolicy: IfNotPresent
   # tag: "latest"
 

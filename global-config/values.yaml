@@ -2,13 +2,13 @@
 
 # Kafka Configuration
 kafka:
-  bootstrapServers: "kafka:9092"
+  bootstrapServers: "bitnami-kafka-controller-headless:9092"
   movesTopic: "game-moves"
   stateTopic: "game-state-updates"
 
 # MongoDB Configuration
 mongodb:
-  url: "mongodb://mongodb:27017"
+  url: "mongodb://mongo8-primary:27017"
   dbName: "admin"
   useAuth: false
   username: ""

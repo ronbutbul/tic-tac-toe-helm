@@ -6,7 +6,7 @@ image:
   # tag: "latest"
 
 inject:
-  image: docker.io/library/busybox:latest
+  image: ronbutbul135/busybox:latest
 
 nameOverride: ""
 fullnameOverride: ""

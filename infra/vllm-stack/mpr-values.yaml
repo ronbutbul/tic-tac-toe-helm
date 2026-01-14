@@ -5,7 +5,10 @@ servingEngineSpec:
     tag: "latest"
     modelURL: "meta-llama/Llama-3.1-8B-Instruct"
     replicaCount: 1
-
+  tolerations:
+    - key: "nvidia.com/gpu"
+      operator: "Exists"
+      effect: "NoSchedule"
     requestCPU: 10
     requestMemory: "16Gi"
     requestGPU: 1

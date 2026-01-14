@@ -19,4 +19,4 @@ servingEngineSpec:
       dtype: "bfloat16"
       extraArgs: ["--disable-log-requests", "--gpu-memory-utilization", "0.8"]
 
-    hf_token: <YOUR HF TOKEN>
+    hf_token: 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

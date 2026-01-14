@@ -9,3 +9,8 @@ operator:
 
 dcgmExporter:
   enabled: false
+
+toolkit:
+  enabled: true
+  repository: 941284018955.dkr.ecr.il-central-1.amazonaws.com/nvidia/k8s
+  image: container-toolkit

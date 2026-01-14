@@ -1,4 +1,7 @@
 servingEngineSpec:
+  tolerations:
+    - key: "nvidia.com/gpu"
+      operator: "Equal"
   modelSpec:
   - name: "llama3"
     repository: "vllm/vllm-openai"

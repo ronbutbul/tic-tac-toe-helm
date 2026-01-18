@@ -1,5 +1,5 @@
 servingEngineSpec:
-  runtimeClassName: "nvidia"
+  runtimeClassName: "nvidia-cdi"
   tolerations:
     - key: "nvidia.com/gpu"
       operator: "Equal"

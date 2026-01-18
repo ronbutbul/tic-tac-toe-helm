@@ -23,3 +23,8 @@ servingEngineSpec:
       extraArgs: ["--disable-log-requests", "--gpu-memory-utilization", "0.8"]
 
     hf_token: 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
+routerSpec:
+  # -- The docker image of the router. The following values are defaults:
+  repository: "ronbutbul135/lmstack-router"
+  tag: "latest"
+  imagePullPolicy: "Always"

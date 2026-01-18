@@ -6,7 +6,7 @@ servingEngineSpec:
   - name: "llama3"
     repository: "vllm/vllm-openai"
     tag: "latest"
-    modelURL: "meta-llama/Llama-3.1-8B-Instruct"
+    modelURL: "EleutherAI/gpt-neox-20b"
     replicaCount: 1
     requestCPU: 10
     requestMemory: "16Gi"

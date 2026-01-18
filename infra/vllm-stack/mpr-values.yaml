@@ -1,5 +1,5 @@
 servingEngineSpec:
-  runtimeClassName: "nvidia-cdi"
+  runtimeClassName: "nvidia"
   tolerations:
     - key: "nvidia.com/gpu"
       operator: "Equal"
@@ -12,25 +12,25 @@ servingEngineSpec:
     requestCPU: 10
     requestMemory: "16Gi"
     requestGPU: 1
-    extraVolumes:
-      - name: toolkit-root
-        hostPath:
-          path: /run/nvidia/toolkit
-          type: Directory
+    # extraVolumes:
+    #   - name: toolkit-root
+    #     hostPath:
+    #       path: /run/nvidia/toolkit
+    #       type: Directory
 
-    # ✅ THEN: mount it in the init container
-    initContainer:
-      name: fix-nvidia-perms
-      image: alpine:3.19
-      command:
-        - sh
-        - -c
-        - |
-          chmod -R 755 /run/nvidia/toolkit
-      mountPvcStorage: false
-      extraVolumeMounts:
-        - name: toolkit-root
-          mountPath: /run/nvidia/toolkit
+    # # ✅ THEN: mount it in the init container
+    # initContainer:
+    #   name: fix-nvidia-perms
+    #   image: alpine:3.19
+    #   command:
+    #     - sh
+    #     - -c
+    #     - |
+    #       chmod -R 755 /run/nvidia/toolkit
+    #   mountPvcStorage: false
+    #   extraVolumeMounts:
+    #     - name: toolkit-root
+    #       mountPath: /run/nvidia/toolkit
 
     pvcStorage: "200Gi"
     pvcAccessMode: ["ReadWriteMany"]

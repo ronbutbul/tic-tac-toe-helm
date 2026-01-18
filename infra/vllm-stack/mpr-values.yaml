@@ -12,6 +12,13 @@ servingEngineSpec:
     requestCPU: 10
     requestMemory: "16Gi"
     requestGPU: 1
+    extraVolumes:
+      - name: toolkit-root
+        hostPath:
+          path: /run/nvidia/toolkit
+          type: Directory
+
+    # ✅ THEN: mount it in the init container
     initContainer:
       name: fix-nvidia-perms
       image: alpine:3.19

@@ -12,7 +12,7 @@ servingEngineSpec:
     requestMemory: "16Gi"
     requestGPU: 1
 
-    pvcStorage: "100Gi"
+    pvcStorage: "200Gi"
     pvcAccessMode: ["ReadWriteMany"]
 
     vllmConfig:

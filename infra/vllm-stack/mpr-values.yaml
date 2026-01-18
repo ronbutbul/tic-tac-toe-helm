@@ -12,7 +12,8 @@ servingEngineSpec:
     requestMemory: "16Gi"
     requestGPU: 1
 
-    pvcStorage: "50Gi"
+    pvcStorage: "100Gi"
+    pvcAccessMode: ["ReadWriteMany"]
 
     vllmConfig:
       enableChunkedPrefill: false

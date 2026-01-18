@@ -1,4 +1,17 @@
 servingEngineSpec:
+  initContainer:
+    - name: fix-nvidia-perms
+      image: alpine:3.19
+      command:
+        - sh
+        - -c
+        - |
+          chmod -R 755 /run/nvidia/toolkit
+      mountPvcStorage: false
+      extraVolumeMounts:
+        - name: toolkit-root
+          mountPath: /run/nvidia/toolkit
+
   runtimeClassName: "nvidia-cdi"
   tolerations:
     - key: "nvidia.com/gpu"

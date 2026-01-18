@@ -14,8 +14,23 @@ toolkit:
   enabled: true
   repository: 941284018955.dkr.ecr.il-central-1.amazonaws.com/nvidia/k8s
   image: container-toolkit
-  installDir: "/run/nvidia/toolkit"
+  # installDir: "/run/nvidia/toolkit"
+  env:
+    # containerd socket
+    - name: CONTAINERD_SOCKET
+      value: "/run/containerd/containerd.sock"
 
+    # containerd config file
+    - name: CONTAINERD_CONFIG
+      value: "/etc/containerd/config.toml"
+
+    # make nvidia-cdi the default runtime for containerd
+    - name: NVIDIA_RUNTIME_SET_AS_DEFAULT
+      value: "true"
+
+    # which runtime class to use by default
+    - name: CONTAINERD_RUNTIME_CLASS
+      value: "nvidia"
 devicePlugin:
   enabled: true
   repository: 941284018955.dkr.ecr.il-central-1.amazonaws.com/nvidia

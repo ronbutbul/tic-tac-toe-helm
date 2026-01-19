@@ -11,7 +11,7 @@ dcgmExporter:
   enabled: false
 
 toolkit:
-  enabled: true
+  enabled: false
   repository: 941284018955.dkr.ecr.il-central-1.amazonaws.com/nvidia/k8s
   image: container-toolkit
   installDir: "/run/nvidia/"

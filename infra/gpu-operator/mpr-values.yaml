@@ -10,6 +10,9 @@ operator:
 dcgmExporter:
   enabled: false
 
+cdi:
+  enabled: false
+
 toolkit:
   enabled: false
   repository: 941284018955.dkr.ecr.il-central-1.amazonaws.com/nvidia/k8s

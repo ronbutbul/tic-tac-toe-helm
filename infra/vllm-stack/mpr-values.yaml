@@ -12,35 +12,15 @@ servingEngineSpec:
     requestCPU: 10
     requestMemory: "16Gi"
     requestGPU: 1
-    # extraVolumes:
-    #   - name: toolkit-root
-    #     hostPath:
-    #       path: /run/nvidia/toolkit
-    #       type: Directory
-
-    # # ✅ THEN: mount it in the init container
-    # initContainer:
-    #   name: fix-nvidia-perms
-    #   image: alpine:3.19
-    #   command:
-    #     - sh
-    #     - -c
-    #     - |
-    #       chmod -R 755 /run/nvidia/toolkit
-    #   mountPvcStorage: false
-    #   extraVolumeMounts:
-    #     - name: toolkit-root
-    #       mountPath: /run/nvidia/toolkit
-
     pvcStorage: "200Gi"
     pvcAccessMode: ["ReadWriteMany"]
 
-    vllmConfig:
-      enableChunkedPrefill: false
-      enablePrefixCaching: false
-      maxModelLen: 16384
-      dtype: "bfloat16"
-      extraArgs: ["--disable-log-requests", "--gpu-memory-utilization", "0.8"]
+    # vllmConfig:
+    #   enableChunkedPrefill: false
+    #   enablePrefixCaching: false
+    #   maxModelLen: 16384
+    #   dtype: "bfloat16"
+    #   extraArgs: ["--disable-log-requests", "--gpu-memory-utilization", "0.8"]
 
     hf_token: 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
 routerSpec:

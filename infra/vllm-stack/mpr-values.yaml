@@ -16,7 +16,7 @@ servingEngineSpec:
 
       requestCPU: 10
       requestMemory: "16Gi"
-      requestGPU: 1
+      requestGPU: 2
 
       pvcStorage: "200Gi"
       pvcAccessMode: ["ReadWriteMany"]
@@ -47,7 +47,7 @@ servingEngineSpec:
           - "/data/gpt-neox-20b"
 
           - "--gpu-memory-utilization"
-          - "0.85"
+          - "0.9"
 
           - "--disable-log-requests"
 

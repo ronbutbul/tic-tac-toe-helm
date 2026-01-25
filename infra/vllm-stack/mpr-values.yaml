@@ -15,6 +15,14 @@ servingEngineSpec:
     pvcStorage: "200Gi"
     pvcAccessMode: ["ReadWriteMany"]
 
+    env:
+      - name: HF_HUB_OFFLINE
+        value: "1"
+      - name: TRANSFORMERS_OFFLINE
+        value: "1"
+      - name: HF_HOME
+        value: "/models/.cache"
+
     # vllmConfig:
     #   enableChunkedPrefill: false
     #   enablePrefixCaching: false

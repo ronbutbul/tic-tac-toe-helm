@@ -11,7 +11,7 @@ servingEngineSpec:
       tag: "v0.14.1"          # PIN — no latest
 
       # Passed positionally to: vllm serve <modelURL>
-      modelURL: "/models/gpt-neox-20b"
+      modelURL: "/data/gpt-neox-20b"
       replicaCount: 1
 
       requestCPU: 10
@@ -34,9 +34,9 @@ servingEngineSpec:
         - name: HF_TOKEN
           value: ""
         - name: HF_HOME
-          value: "/models/.cache"
+          value: "/data/.cache"
         - name: TRANSFORMERS_CACHE
-          value: "/models/.cache"
+          value: "/data/.cache"
         - name: VLLM_LOGGING_LEVEL
           value: "DEBUG"
 
@@ -46,7 +46,7 @@ servingEngineSpec:
         extraArgs:
           # tokenizer override is optional but safe
           - "--tokenizer"
-          - "/models/gpt-neox-20b"
+          - "/data/gpt-neox-20b"
 
           - "--gpu-memory-utilization"
           - "0.85"

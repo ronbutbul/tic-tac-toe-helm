@@ -22,7 +22,8 @@ servingEngineSpec:
         value: "1"
       - name: HF_HOME
         value: "/models/.cache"
-
+      - name: VLLM_LOGGING_LEVEL
+        value: "DEBUG"
     # vllmConfig:
     #   enableChunkedPrefill: false
     #   enablePrefixCaching: false

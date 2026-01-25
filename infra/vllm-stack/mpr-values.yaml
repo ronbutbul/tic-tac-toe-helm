@@ -3,55 +3,59 @@ servingEngineSpec:
   tolerations:
     - key: "nvidia.com/gpu"
       operator: "Equal"
+
   modelSpec:
-  - name: "llama3"
-    repository: "vllm/vllm-openai"
-    tag: "latest"
-    modelURL: "/models/gpt-neox-20b"
-    replicaCount: 1
-    requestCPU: 10
-    requestMemory: "16Gi"
-    requestGPU: 1
-    pvcStorage: "200Gi"
-    pvcAccessMode: ["ReadWriteMany"]
+    - name: "llama3"
 
-    env:
-      - name: HF_HUB_OFFLINE
-        value: "1"
-      - name: TRANSFORMERS_OFFLINE
-        value: "1"
-      - name: HF_DATASETS_OFFLINE
-        value: "1"
-      - name: HF_HUB_DISABLE_TELEMETRY
-        value: "1"
-      - name: HF_TOKEN
-        value: ""
-      - name: HF_HOME
-        value: "/models/.cache"
-      - name: TRANSFORMERS_CACHE
-        value: "/models/.cache"
-      - name: VLLM_LOGGING_LEVEL
-        value: "DEBUG"
+      repository: "vllm/vllm-openai"
+      tag: "v0.14.1"          # PIN — no latest
 
+      # Passed positionally to: vllm serve <modelURL>
+      modelURL: "/models/gpt-neox-20b"
+      replicaCount: 1
 
-    vllmConfig:
-      maxModelLen: 2048
-      dtype: "float16"
-      extraArgs:
-        
-        - "--local-files-only"
+      requestCPU: 10
+      requestMemory: "16Gi"
+      requestGPU: 1
 
-        - "--tokenizer"
-        - "/models/gpt-neox-20b"
+      pvcStorage: "200Gi"
+      pvcAccessMode: ["ReadWriteMany"]
 
-        - "--gpu-memory-utilization"
-        - "0.85"
+      # OFFLINE MODE (this is enough)
+      env:
+        - name: HF_HUB_OFFLINE
+          value: "1"
+        - name: TRANSFORMERS_OFFLINE
+          value: "1"
+        - name: HF_DATASETS_OFFLINE
+          value: "1"
+        - name: HF_HUB_DISABLE_TELEMETRY
+          value: "1"
+        - name: HF_TOKEN
+          value: ""
+        - name: HF_HOME
+          value: "/models/.cache"
+        - name: TRANSFORMERS_CACHE
+          value: "/models/.cache"
+        - name: VLLM_LOGGING_LEVEL
+          value: "DEBUG"
 
-        - "--disable-log-requests"
+      vllmConfig:
+        maxModelLen: 2048
+        dtype: "float16"
+        extraArgs:
+          # tokenizer override is optional but safe
+          - "--tokenizer"
+          - "/models/gpt-neox-20b"
 
-    hf_token: ""
+          - "--gpu-memory-utilization"
+          - "0.85"
+
+          - "--disable-log-requests"
+
+      hf_token: ""
+
 routerSpec:
-  # -- The docker image of the router. The following values are defaults:
   repository: "ronbutbul135/lmstack-router"
   tag: "latest"
   imagePullPolicy: "Always"

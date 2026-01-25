@@ -24,12 +24,32 @@ servingEngineSpec:
         value: "/models/.cache"
       - name: VLLM_LOGGING_LEVEL
         value: "DEBUG"
+      - name: HF_TOKEN
+        value: ""
     # vllmConfig:
     #   enableChunkedPrefill: false
     #   enablePrefixCaching: false
     #   maxModelLen: 16384
     #   dtype: "bfloat16"
     #   extraArgs: ["--disable-log-requests", "--gpu-memory-utilization", "0.8"]
+
+    vllmConfig:
+      maxModelLen: 2048
+      dtype: "float16"
+      extraArgs:
+        # Force local paths (prevents snapshot_download path handling issues)
+        - "--model"
+        - "/models/gpt-neox-20b"
+        - "--tokenizer"
+        - "/models/gpt-neox-20b"
+
+        # Optional but helpful
+        - "--load-format"
+        - "auto"
+
+        - "--gpu-memory-utilization"
+        - "0.85"
+        - "--disable-log-requests"
 
     hf_token: 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
 routerSpec:

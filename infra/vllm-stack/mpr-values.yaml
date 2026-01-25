@@ -35,8 +35,6 @@ servingEngineSpec:
           value: ""
         - name: HF_HOME
           value: "/data/.cache"
-        - name: TRANSFORMERS_CACHE
-          value: "/data/.cache"
         - name: VLLM_LOGGING_LEVEL
           value: "DEBUG"
 

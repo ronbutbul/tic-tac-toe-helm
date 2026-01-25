@@ -37,21 +37,19 @@ servingEngineSpec:
       maxModelLen: 2048
       dtype: "float16"
       extraArgs:
-        # Force local paths (prevents snapshot_download path handling issues)
-        - "--model"
-        - "/models/gpt-neox-20b"
+        # tokenizer override is optional; keep if your model needs it
         - "--tokenizer"
         - "/models/gpt-neox-20b"
 
-        # Optional but helpful
         - "--load-format"
         - "auto"
 
         - "--gpu-memory-utilization"
         - "0.85"
+
         - "--disable-log-requests"
 
-    hf_token: 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
+    hf_token: ""
 routerSpec:
   # -- The docker image of the router. The following values are defaults:
   repository: "ronbutbul135/lmstack-router"

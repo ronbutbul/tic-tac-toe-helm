@@ -20,29 +20,29 @@ servingEngineSpec:
         value: "1"
       - name: TRANSFORMERS_OFFLINE
         value: "1"
+      - name: HF_DATASETS_OFFLINE
+        value: "1"
+      - name: HF_HUB_DISABLE_TELEMETRY
+        value: "1"
+      - name: HF_TOKEN
+        value: ""
       - name: HF_HOME
+        value: "/models/.cache"
+      - name: TRANSFORMERS_CACHE
         value: "/models/.cache"
       - name: VLLM_LOGGING_LEVEL
         value: "DEBUG"
-      - name: HF_TOKEN
-        value: ""
-    # vllmConfig:
-    #   enableChunkedPrefill: false
-    #   enablePrefixCaching: false
-    #   maxModelLen: 16384
-    #   dtype: "bfloat16"
-    #   extraArgs: ["--disable-log-requests", "--gpu-memory-utilization", "0.8"]
+
 
     vllmConfig:
       maxModelLen: 2048
       dtype: "float16"
       extraArgs:
-        # tokenizer override is optional; keep if your model needs it
+        
+        - "--local-files-only"
+
         - "--tokenizer"
         - "/models/gpt-neox-20b"
-
-        - "--load-format"
-        - "auto"
 
         - "--gpu-memory-utilization"
         - "0.85"

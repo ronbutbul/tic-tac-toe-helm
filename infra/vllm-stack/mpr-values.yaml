@@ -16,7 +16,7 @@ servingEngineSpec:
 
       requestCPU: 10
       requestMemory: "16Gi"
-      requestGPU: 2
+      requestGPU: 1
 
       pvcStorage: "200Gi"
       pvcAccessMode: ["ReadWriteMany"]
@@ -39,7 +39,7 @@ servingEngineSpec:
           value: "DEBUG"
 
       vllmConfig:
-        maxModelLen: 2048
+        maxModelLen: 1024
         dtype: "float16"
         extraArgs:
           # tokenizer override is optional but safe
@@ -47,7 +47,7 @@ servingEngineSpec:
           - "/data/gpt-neox-20b"
 
           - "--gpu-memory-utilization"
-          - "0.9"
+          - "0.95"
 
           - "--disable-log-requests"
 

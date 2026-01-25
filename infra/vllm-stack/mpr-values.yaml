@@ -54,6 +54,6 @@ servingEngineSpec:
       hf_token: ""
 
 routerSpec:
-  repository: "ronbutbul135/lmstack-router"
+  repository: "941284018955.dkr.ecr.il-central-1.amazonaws.com/vllm/lmstack-router:latest"
   tag: "latest"
   imagePullPolicy: "Always"

@@ -1,5 +1,0 @@
-registry: "artifactory.rafael.co.il:6001"
-imagePullSecrets: 
-  - name: "tsgs-registry"
-
-

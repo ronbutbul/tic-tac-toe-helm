@@ -39,7 +39,7 @@ servingEngineSpec:
           value: "DEBUG"
 
       vllmConfig:
-        maxModelLen: 1024
+        maxModelLen: 8192
         dtype: "float16"
         extraArgs:
           # tokenizer override is optional but safe

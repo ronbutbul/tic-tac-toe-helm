@@ -10,3 +10,10 @@ controller:
 ui:
   image:
     registry: "941284018955.dkr.ecr.il-central-1.amazonaws.com"
+kmcp:
+  image:
+  repository: 941284018955.dkr.ecr.il-central-1.amazonaws.com/kagent-dev/kmcp/controller
+kagent-tools:
+  tools:
+    image:
+      registry: 941284018955.dkr.ecr.il-central-1.amazonaws.com

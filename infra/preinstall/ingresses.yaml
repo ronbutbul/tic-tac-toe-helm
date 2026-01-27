@@ -24,3 +24,28 @@ spec:
         path: /auth
         pathType: Prefix
 ---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kagent-ingress
+  namespace: default
+spec:
+  tls:
+    - hosts:
+      - kagent.testmpr.aws2.rafael.co.il
+      # This assumes tls-secret exists and the SSL
+      # certificate contains a CN for foo.bar.com
+      secretName: testmpr-aws-wildcard-cert
+  ingressClassName: nginx
+  rules:
+  - host: kagent.testmpr.aws2.rafael.co.il
+    http:
+      paths:
+      - backend:
+          service:
+            name: kagent-ui
+            port: 
+              number: 8080
+        path: /
+        pathType: Prefix
+---

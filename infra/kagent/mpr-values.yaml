@@ -34,3 +34,6 @@ agents:
     enabled: false
   promql-agent:
     enabled: false
+  argo-rollouts-agent:
+    enabled: false
+    

@@ -31,15 +31,15 @@ $KUBECTL wait \
   -l app.kubernetes.io/part-of=argocd \
   --timeout=10m
 
-echo "[INFO] Re-enabling auto-sync for all ArgoCD Applications"
+echo "[INFO] Enabling auto-sync (prune=true, selfHeal=true) for all ArgoCD Applications"
 $KUBECTL get applications.argoproj.io -A \
   -o jsonpath='{range .items[*]}{.metadata.namespace}{" "}{.metadata.name}{"\n"}{end}' |
 while read -r ns name; do
-  echo "  → Patching $ns/$name"
+  echo "  → Patching $ns/$name (enable auto-sync: prune+selfHeal)"
   $KUBECTL patch applications.argoproj.io "$name" \
     -n "$ns" \
     --type merge \
-    -p '{"spec":{"syncPolicy":{"automated":{"selfHeal":true,"prune":true}}}}'
+    -p '{"spec":{"syncPolicy":{"automated":{"prune":true,"selfHeal":true}}}}'
 done
 
 echo "[SUCCESS] Start job completed safely on context '${CURRENT_CTX}'"

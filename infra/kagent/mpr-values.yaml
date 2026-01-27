@@ -17,3 +17,20 @@ kagent-tools:
   tools:
     image:
       registry: 941284018955.dkr.ecr.il-central-1.amazonaws.com
+agents:
+  cilium-policy-agent:
+    enabled: false
+  cilium-manager-agent:
+    enabled: false
+  cilium-debug-agent:
+    enabled: false
+  helm-agent:
+    enabled: false
+  istio-agent:
+    enabled: false
+  kgateway-agent:
+    enabled: false
+  observability-agent:
+    enabled: false
+  promql-agent:
+    enabled: false

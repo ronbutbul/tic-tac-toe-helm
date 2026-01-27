@@ -17,6 +17,10 @@ kagent-tools:
   tools:
     image:
       registry: 941284018955.dkr.ecr.il-central-1.amazonaws.com
+
+k8s-agent:
+  modelConfigRef: "vllm-ministral"
+
 agents:
   cilium-policy-agent:
     enabled: false

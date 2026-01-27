@@ -1,0 +1,15 @@
+apiVersion: kagent.dev/v1alpha2
+kind: ModelConfig
+metadata:
+  name: vllm-ministral
+  namespace: default
+spec:
+  provider: OpenAI
+  model: "/data/Ministral-3-8B-Instruct-2512"
+
+  # kagent expects these fields in the spec (even if the upstream provider doesn't enforce auth)
+  apiKeySecret: vllm-dummy-key
+  apiKeySecretKey: OPENAI_API_KEY
+
+  openAI:
+    baseUrl: "http://vllm-llama3-engine-service/v1"

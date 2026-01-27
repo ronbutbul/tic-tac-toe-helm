@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nvidia-smi-test
+spec:
+  restartPolicy: OnFailure
+  containers:
+    - name: cuda-pod
+      image: ronbutbul135/cuda:12.6.3-runtime-ubuntu22.04
+      imagePullPolicy: IfNotPresent
+      command: ["/bin/sh"]
+      args: ["-c", "nvidia-smi"]
+      resources:
+        limits:
+          nvidia.com/gpu: 1

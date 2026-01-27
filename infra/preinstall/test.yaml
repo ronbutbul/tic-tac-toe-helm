@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nvidia-runtime-test
+spec:
+  runtimeClassName: nvidia
+  restartPolicy: Never
+  containers:
+  - name: cuda
+    image: nvidia/cuda:12.4.1-base-ubuntu22.04
+    command: ["/bin/bash","-lc"]
+    args:
+      - |
+        ls -l /dev/nvidia* || true
+        ldconfig -p | grep -i cuda || true
+        nvidia-smi || true
+    resources:
+      limits:
+        nvidia.com/gpu: 1

@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: node-debug11
+  namespace: default
+spec:
+  hostPID: true
+  hostNetwork: true
+  nodeName: ip-10-30-136-194.il-central-1.compute.internal   # <-- CHANGE to your GPU node name
+  tolerations:
+    - key: "nvidia.com/gpu"
+      operator: "Exists"
+      effect: "NoSchedule"
+  containers:
+    - name: debug
+      image: ronbutbul135/alpine:3.19
+      command:
+        - sleep
+        - infinity
+      securityContext:
+        privileged: true
+      volumeMounts:
+        - name: host-root
+          mountPath: /host
+  volumes:
+    - name: host-root
+      hostPath:
+        path: /

@@ -39,7 +39,7 @@ while read -r ns name; do
   $KUBECTL patch applications.argoproj.io "$name" \
     -n "$ns" \
     --type merge \
-    -p '{"spec":{"syncPolicy":{"automated":{}}}}'
+    -p '{"spec":{"syncPolicy":{"automated":{"selfHeal":true,"prune":true}}}}'
 done
 
 echo "[SUCCESS] Start job completed safely on context '${CURRENT_CTX}'"

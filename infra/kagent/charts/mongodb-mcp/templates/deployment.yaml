@@ -35,7 +35,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
           args:
             - --transport
-            - streamable-http
+            - http
             {{- with .Values.args }}
             {{- toYaml . | nindent 12 }}
             {{- end }}

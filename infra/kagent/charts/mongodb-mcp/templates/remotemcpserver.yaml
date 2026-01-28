@@ -11,4 +11,4 @@ spec:
   sseReadTimeout: 5m0s
   terminateOnClose: true
   timeout: 30s
-  url: {{ .Values.mongodb.serverUrl }}
+  url: {{ include "mongodb-mcp.serverUrl" . }}

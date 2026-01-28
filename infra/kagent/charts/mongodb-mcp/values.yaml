@@ -2,6 +2,7 @@ replicas: 1
 
 mongodb:
   url: ""
+  serverUrl: ""
   # serviceAccountToken: ""
   # apiKey: "" # Deprecated - use serviceAccountToken instead.
 

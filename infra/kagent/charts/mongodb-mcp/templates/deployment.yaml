@@ -36,6 +36,10 @@ spec:
           args:
             - --transport
             - http
+            - --httpHost
+            - 0.0.0.0
+            - --httpPort
+            - "8000"
             {{- with .Values.args }}
             {{- toYaml . | nindent 12 }}
             {{- end }}

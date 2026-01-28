@@ -1,0 +1,37 @@
+apiVersion: kagent.dev/v1alpha2
+kind: Agent
+metadata:
+  name: mongodb-agent
+  namespace: default
+spec:
+  type: Declarative
+  description: MongoDB assistant agent (via MCP)
+  declarative:
+    modelConfig: vllm-ministral
+    stream: true
+    systemMessage: |
+      You are a helpful MongoDB assistant.
+
+      - Prefer read-only tools unless the user explicitly asks to modify data.
+      - When asked “what databases exist”, use list-databases.
+      - When asked “what collections”, use list-collections.
+      - When asked to query documents, use find with a small limit.
+      - If the user provides a new MongoDB connection string, use switch-connection.
+
+    tools:
+      - type: McpServer
+        mcpServer:
+          apiGroup: kagent.dev
+          kind: RemoteMCPServer
+          name: mongodb-mcp
+          toolNames:
+            - list-databases
+            - list-collections
+            - db-stats
+            - collection-schema
+            - find
+            - aggregate
+            - count
+            - collection-indexes
+            - mongodb-logs
+            - switch-connection

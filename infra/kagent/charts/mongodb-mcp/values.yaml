@@ -1,7 +1,7 @@
 replicas: 1
 
 mongodb:
-  url: "mongodb://mongo8-primary:27017"
+  url: ""
   # serviceAccountToken: ""
   # apiKey: "" # Deprecated - use serviceAccountToken instead.
 

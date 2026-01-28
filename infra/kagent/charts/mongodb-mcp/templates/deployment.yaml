@@ -48,8 +48,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "mongodb-mcp.fullname" . }}
-            - secretRef:
-                name: {{ include "mongodb-mcp.fullname" . }}
+            # - secretRef:
+            #     name: {{ include "mongodb-mcp.fullname" . }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

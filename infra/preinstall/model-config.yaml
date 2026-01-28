@@ -13,3 +13,5 @@ spec:
 
   openAI:
     baseUrl: "http://vllm-llama3-engine-service/v1"
+    maxTokens: 1000000000
+    temperature: "0.7"   

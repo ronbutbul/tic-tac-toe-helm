@@ -21,6 +21,10 @@ kagent-tools:
 k8s-agent:
   modelConfigRef: "vllm-ministral"
 
+mongodb-mcp:
+  mongodb:
+    url: "mongodb://mongo8-primary:27017"
+
 agents:
   cilium-policy-agent:
     enabled: false

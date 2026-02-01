@@ -42,7 +42,7 @@ servingEngineSpec:
           value: "1"    
       vllmConfig:
         maxModelLen: 3072
-        dtype: "float16"
+        dtype: "auto"
         extraArgs:
           # tokenizer override is optional but safe
           - "--tokenizer"

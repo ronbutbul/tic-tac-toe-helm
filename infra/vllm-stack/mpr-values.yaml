@@ -11,7 +11,7 @@ servingEngineSpec:
       tag: "v0.14.1"          # PIN — no latest
 
       # Passed positionally to: vllm serve <modelURL>
-      modelURL: "/data/Ministral-3-8B-Instruct-2512"
+      modelURL: "/data/gpt-neox-20b"
       replicaCount: 1
 
       requestCPU: 10
@@ -44,7 +44,7 @@ servingEngineSpec:
         extraArgs:
           # tokenizer override is optional but safe
           - "--tokenizer"
-          - "/data/Ministral-3-8B-Instruct-2512"
+          - "/data/gpt-neox-20b"
 
           - "--gpu-memory-utilization"
           - "0.95"

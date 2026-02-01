@@ -11,7 +11,7 @@ servingEngineSpec:
       tag: "v0.14.1"          # PIN — no latest
 
       # Passed positionally to: vllm serve <modelURL>
-      modelURL: "/data/gpt-neox-20b"
+      modelURL: "/data/gpt-oss-20b"
       replicaCount: 1
 
       requestCPU: 10
@@ -37,15 +37,15 @@ servingEngineSpec:
           value: "/data/.cache"
         - name: VLLM_LOGGING_LEVEL
           value: "DEBUG"
-        - name: VLLM_ALLOW_LONG_MAX_MODEL_LEN
-          value: "1"    
+        # - name: VLLM_ALLOW_LONG_MAX_MODEL_LEN
+        #   value: "1"    
       vllmConfig:
         maxModelLen: 3072
         dtype: "float16"
         extraArgs:
           # tokenizer override is optional but safe
           - "--tokenizer"
-          - "/data/gpt-neox-20b"
+          - "/data/gpt-oss-20b"
 
           - "--gpu-memory-utilization"
           - "0.95"

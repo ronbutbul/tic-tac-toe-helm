@@ -40,6 +40,8 @@ servingEngineSpec:
           value: "DEBUG"
         - name: VLLM_ALLOW_LONG_MAX_MODEL_LEN
           value: "1"    
+        - name: TIKTOKEN_ENCODINGS_BASE
+          value: "/data/gpt-oss-20b/tiktoken_encodings"
       vllmConfig:
         maxModelLen: 3072
         dtype: "auto"

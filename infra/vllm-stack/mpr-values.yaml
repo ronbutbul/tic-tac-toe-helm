@@ -38,8 +38,8 @@ servingEngineSpec:
           value: "/data/.cache"
         - name: VLLM_LOGGING_LEVEL
           value: "DEBUG"
-        # - name: VLLM_ALLOW_LONG_MAX_MODEL_LEN
-        #   value: "1"    
+        - name: VLLM_ALLOW_LONG_MAX_MODEL_LEN
+          value: "1"    
       vllmConfig:
         maxModelLen: 3072
         dtype: "float16"

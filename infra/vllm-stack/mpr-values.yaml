@@ -40,7 +40,7 @@ servingEngineSpec:
         - name: VLLM_ALLOW_LONG_MAX_MODEL_LEN
           value: "1"    
       vllmConfig:
-        maxModelLen: 8192
+        maxModelLen: 3072
         dtype: "float16"
         extraArgs:
           # tokenizer override is optional but safe

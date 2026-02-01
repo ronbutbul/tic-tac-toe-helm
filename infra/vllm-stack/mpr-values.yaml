@@ -9,6 +9,7 @@ servingEngineSpec:
 
       repository: "vllm/vllm-openai"
       tag: "v0.14.1"          # PIN — no latest
+      imagePullPolicy: "Always" 
 
       # Passed positionally to: vllm serve <modelURL>
       modelURL: "/data/gpt-oss-20b"

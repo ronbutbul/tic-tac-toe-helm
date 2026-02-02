@@ -6,7 +6,13 @@ metadata:
   labels:
     {{- include "mongodb-mcp.labels" . | nindent 4 }}
 data:
-  MDB_MCP_CONNECTION_STRING: {{ .Values.mongodb.url }}
+  {{- if .Values.mongodb.url }}
+  MDB_MCP_CONNECTION_STRING: {{ .Values.mongodb.url | quote }}
+  {{- else }}
+  MDB_MCP_CONNECTION_STRING: "mongodb://localhost:27017"
+  {{- end }}
+  MCP_HOST: "0.0.0.0"
+  MCP_PORT: "8000"
   DO_NOT_TRACK: "1"
   # Custom configuration
   {{- range $key, $value := .Values.config }}

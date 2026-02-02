@@ -7,7 +7,7 @@ mongodb:
   # apiKey: "" # Deprecated - use serviceAccountToken instead.
 
 image:
-  registry: ronbutbul135
+  registry: 941284018955.dkr.ecr.il-central-1.amazonaws.com
   repository: mongodb-mcp-service
   pullPolicy: Always 
   tag: "20260202-125414-05b5e27f" # Only latest is available via docker hub at present. See https://github.com/grafana/mcp-grafana/issues/180

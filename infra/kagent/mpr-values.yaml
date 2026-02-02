@@ -19,7 +19,7 @@ kagent-tools:
       registry: 941284018955.dkr.ecr.il-central-1.amazonaws.com
 
 k8s-agent:
-  modelConfigRef: "vllm-ministral"
+  modelConfigRef: "vllm-gpt"
 
 mongodb-mcp:
   mongodb:

@@ -1,11 +1,11 @@
 apiVersion: kagent.dev/v1alpha2
 kind: ModelConfig
 metadata:
-  name: vllm-ministral
+  name: vllm-gpt
   namespace: default
 spec:
   provider: OpenAI
-  model: "/data/Ministral-3-8B-Instruct-2512"
+  model: "/data/gpt-oss-20b"
 
   # kagent expects these fields in the spec (even if the upstream provider doesn't enforce auth)
   apiKeySecret: vllm-dummy-key

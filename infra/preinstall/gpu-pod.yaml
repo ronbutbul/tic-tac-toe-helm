@@ -6,7 +6,7 @@ spec:
   restartPolicy: OnFailure
   containers:
     - name: cuda-pod
-      image: ronbutbul135/cuda:12.6.3-runtime-ubuntu22.04
+      image: 941284018955.dkr.ecr.il-central-1.amazonaws.com/cuda:12.6.3-runtime-ubuntu22.04
       imagePullPolicy: IfNotPresent
       command: ["/bin/sh"]
       args: ["-c", "nvidia-smi"]

@@ -6,7 +6,7 @@ metadata:
 spec:
   hostPID: true
   hostNetwork: true
-  nodeName: ip-10-30-136-194.il-central-1.compute.internal   # <-- CHANGE to your GPU node name
+  nodeName: i-0ee453aa6dbc75dd3   # <-- CHANGE to your GPU node name
   tolerations:
     - key: "nvidia.com/gpu"
       operator: "Exists"

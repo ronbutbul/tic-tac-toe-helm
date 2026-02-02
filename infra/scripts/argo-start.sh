@@ -42,4 +42,15 @@ while read -r ns name; do
     -p '{"spec":{"syncPolicy":{"automated":{"prune":true,"selfHeal":true}}}}'
 done
 
+echo "[INFO] Scaling all Deployments with label app=kagent to 1 replica"
+# List namespaces+names of matching deployments, then scale each
+$KUBECTL get deploy -A -l app=kagent \
+  -o jsonpath='{range .items[*]}{.metadata.namespace}{" "}{.metadata.name}{"\n"}{end}' |
+while read -r ns name; do
+  # skip empty lines in case there are no matches
+  [[ -z "${ns:-}" || -z "${name:-}" ]] && continue
+  echo "  → Scaling $ns/$name to 1"
+  $KUBECTL scale deploy "$name" -n "$ns" --replicas=1
+done
+
 echo "[SUCCESS] Start job completed safely on context '${CURRENT_CTX}'"

@@ -49,12 +49,12 @@ servingEngineSpec:
           # tokenizer override is optional but safe
           - "--tokenizer"
           - "/data/gpt-oss-20b"
-
           - "--gpu-memory-utilization"
           - "0.95"
-
           - "--disable-log-requests"
-
+          - "--tool-call-parser"
+          - "openai"
+          - "--enable-auto-tool-choice"
       hf_token: ""
 
 routerSpec:

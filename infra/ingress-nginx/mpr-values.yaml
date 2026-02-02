@@ -53,6 +53,6 @@ tcp:
 
 ## MongoDB-8 ##
   27017: "default/mongo8-primary:27017"
-
+  9095: "default/bitnami-kafka:9095"
 
 

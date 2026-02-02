@@ -43,7 +43,7 @@ servingEngineSpec:
         - name: TIKTOKEN_ENCODINGS_BASE
           value: "/data/gpt-oss-20b/tiktoken_encodings"
       vllmConfig:
-        maxModelLen: 3072
+        maxModelLen: 8092
         dtype: "auto"
         extraArgs:
           # tokenizer override is optional but safe

@@ -97,7 +97,7 @@ prometheus-node-exporter:
 prometheusOperator:
   enabled: true
   admissionWebhooks:
-    enabled: false
+    failurePolicy: "Ignore"
     
   # image:
   #   registry: artifactory.rafael.co.il:6001/quay.io

@@ -24,6 +24,11 @@ k8s-agent:
 mongodb-mcp:
   mongodb:
     url: "mongodb://mongo8-primary:27017"
+grafana-mcp:
+  grafana:
+    url: "grafana.kagent:3000/api"
+    serviceAccountToken: ""
+    apiKey: "" # Deprecated - use serviceAccountToken instead.
 
 kafka-mcp:
   kafka:

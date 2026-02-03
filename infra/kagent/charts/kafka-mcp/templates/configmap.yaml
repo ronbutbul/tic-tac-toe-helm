@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "kafka-mcp.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kafka-mcp.labels" . | nindent 4 }}
+data:
+  {{- if .Values.kafka.url }}
+  KAFKA_BOOTSTRAP_SERVERS: {{ .Values.kafka.url | quote }}
+  {{- else }}
+  KAFKA_BOOTSTRAP_SERVERS: "http://localhost:9092"
+  {{- end }}
+  {{- if .Values.kafkaadmin.url }}
+  KAFKA_ADMIN_SERVERS: {{ .Values.kafkaadmin.url | quote }}
+  {{- else }}
+  KAFKA_ADMIN_SERVERS: "http://localhost:9093"
+  {{- end }}  
+  MCP_HOST: "0.0.0.0"
+  MCP_PORT: "8000"
+  DO_NOT_TRACK: "1"
+  # Custom configuration
+  {{- range $key, $value := .Values.config }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}

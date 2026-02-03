@@ -1,0 +1,63 @@
+replicas: 1
+
+kafka:
+  url: ""
+  serverUrl: ""
+
+kafkaadmin:
+  url: ""
+  # serviceAccountToken: ""
+  # apiKey: "" # Deprecated - use serviceAccountToken instead.
+
+image:
+  registry: 941284018955.dkr.ecr.il-central-1.amazonaws.com
+  repository: kafka-mcp-service
+  pullPolicy: Always 
+  tag: "20260202-131744-c6772109" # Only latest is available via docker hub at present. See https://github.com/grafana/mcp-grafana/issues/180
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+securityContext: {}
+  
+tolerations: []
+
+nodeSelector: {}
+
+service:
+  type: ClusterIP
+  port: 8000
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# Additional Arguments for the mcp server
+args: []
+
+# Additional volumes on the output Deployment definition.
+volumes: []
+# - name: foo
+#   secret:
+#     secretName: mysecret
+#     optional: false
+
+# Additional volumeMounts on the output Deployment definition.
+volumeMounts: []
+# - name: foo
+#   mountPath: "/etc/foo"
+#   readOnly: true
+
+# Deployment configuration - used to populate the ConfigMap template.
+# Add custom configuration values here as needed.
+config:
+

@@ -25,6 +25,11 @@ mongodb-mcp:
   mongodb:
     url: "mongodb://mongo8-primary:27017"
 
+kafka-mcp:
+  kafka:
+    url: "bitnami-kafka:9092"
+  kafkaadmin:
+    url: "bitnami-kafka-controller-headless:9093"
 agents:
   cilium-policy-agent:
     enabled: false

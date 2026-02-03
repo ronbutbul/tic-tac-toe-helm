@@ -1,0 +1,38 @@
+MCP_URL="http://kagent-kafka-mcp:8000/mcp"
+
+curl -sS "$MCP_URL" \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -d '{
+    "jsonrpc":"2.0",
+    "id":1,
+    "method":"initialize",
+    "params":{
+      "protocolVersion":"2024-11-05",
+      "clientInfo":{"name":"curl-test","version":"0.0.1"},
+      "capabilities":{}
+    }
+  }'
+
+SID="$(curl -sS -D - "$MCP_URL" \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -o /dev/null \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","clientInfo":{"name":"curl-test","version":"0.0.1"},"capabilities":{}}}' \
+  | tr -d '\r' | awk -F': ' 'tolower($1)=="mcp-session-id"{print $2}')"
+
+echo "SID=$SID"
+
+curl -sS "$MCP_URL" \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -H "MCP-Session-Id: $SID" \
+  -d '{
+    "jsonrpc":"2.0",
+    "id":3,
+    "method":"tools/call",
+    "params":{
+      "name":"list-databases",
+      "arguments":{}
+    }
+  }'

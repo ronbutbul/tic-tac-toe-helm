@@ -26,7 +26,7 @@ mongodb-mcp:
     url: "mongodb://mongo8-primary:27017"
 grafana-mcp:
   grafana:
-    url: "http://pro-grafana"
+    url: "http://pro-grafana/api"
     serviceAccountToken: "glsa_VN5asxLExvqtZIx7qykXAJMq5uNtTEea_d56fc06f"
     apiKey: "" # Deprecated - use serviceAccountToken instead.
 

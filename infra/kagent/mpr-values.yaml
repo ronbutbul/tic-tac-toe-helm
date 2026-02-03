@@ -26,8 +26,8 @@ mongodb-mcp:
     url: "mongodb://mongo8-primary:27017"
 grafana-mcp:
   grafana:
-    url: "grafana.kagent:3000/api"
-    serviceAccountToken: ""
+    url: "pro-grafana:80/api"
+    serviceAccountToken: "glsa_VN5asxLExvqtZIx7qykXAJMq5uNtTEea_d56fc06f"
     apiKey: "" # Deprecated - use serviceAccountToken instead.
 
 kafka-mcp:

@@ -2,7 +2,7 @@
 #   imagePullSecrets: 
 #   - name: "tsinf-reg"
 #   imageRegistry: artifactory.rafael.co.il:6001
-
+prometheusOperator:
   admissionWebhooks:
     enabled: false
 

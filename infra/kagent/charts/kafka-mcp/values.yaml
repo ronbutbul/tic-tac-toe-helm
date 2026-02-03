@@ -13,7 +13,7 @@ image:
   registry: 941284018955.dkr.ecr.il-central-1.amazonaws.com
   repository: kafka-mcp-service
   pullPolicy: Always 
-  tag: "20260202-131744-c6772109" # Only latest is available via docker hub at present. See https://github.com/grafana/mcp-grafana/issues/180
+  tag: "20260203-110114-15951fd6" # Only latest is available via docker hub at present. See https://github.com/grafana/mcp-grafana/issues/180
 
 nameOverride: ""
 fullnameOverride: ""

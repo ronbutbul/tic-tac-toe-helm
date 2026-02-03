@@ -3,6 +3,9 @@
 #   - name: "tsinf-reg"
 #   imageRegistry: artifactory.rafael.co.il:6001
 
+  admissionWebhooks:
+    enabled: false
+
 alertmanager:
   enabled: true
 #   alertmanagerSpec:

@@ -1,0 +1,353 @@
+global:
+  imagePullSecrets: 
+  - name: "tsinf-reg"
+  imageRegistry: artifactory.rafael.co.il:6001
+
+alertmanager:
+  enabled: true
+  alertmanagerSpec:
+    image:
+      registry: artifactory.rafael.co.il:6001/quay.io
+      repository: prometheus/alertmanager
+      tag: v0.27.0
+
+    tolerations:
+    - key: "statefulset/special-taint"
+      operator: "Equal"
+    affinity:
+      nodeAffinity:
+       requiredDuringSchedulingIgnoredDuringExecution:
+         nodeSelectorTerms:
+         - matchExpressions:
+           - key: statefulset/special-taint
+             operator: In
+             values:
+             - stateful
+
+grafana:
+  enabled: true
+  image:
+    registry: artifactory.rafael.co.il:6001
+    repository: grafana/grafana
+  # persistence:
+  #   enabled: true
+  #   type: sts
+  #   storageClassName: "prometheus-sc"
+  #   accessModes:
+  #     - ReadWriteOnce
+  #   size: 20Gi
+  #   finalizers:
+  #     - kubernetes.io/pvc-protection
+   
+  sidecar:
+    dashboards:
+      enable: true
+      folderAnnotation: grafana_folder
+      provider:
+        foldersFromFilesStructure: true     
+      label: grafana_dashboard
+      labelValue: "1"
+      searchNamespace: general
+    alerts:
+      enabled: true
+      label: grafana_alert
+      labelValue: "1"
+      searchNamespace: general
+
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+    hosts: 
+      - "grafana.tsgs.aws2.rafael.co.il"
+      # path: /grafana(/|$)(.*)
+    path: /
+    tls:
+       - secretName: tsgs-cicd-aws-wildcard-cert
+         hosts:
+           - grafana.tsgs.aws2.rafael.co.il
+
+  tolerations:
+  - key: "statefulset/special-taint"
+    operator: "Equal"
+  affinity:
+    nodeAffinity:
+     requiredDuringSchedulingIgnoredDuringExecution:
+       nodeSelectorTerms:
+       - matchExpressions:
+         - key: statefulset/special-taint
+           operator: In
+           values:
+           - stateful
+    
+  grafana.ini:
+      users:
+        viewers_can_edit: false
+      auth:
+        disable_login_form: false
+        disable_signout_menu: false
+      security:
+        allow_embedding: true
+      auth.anonymous:
+        enabled: true
+        org_role: Viewer
+
+kubeStateMetrics:
+  enabled: true
+  image:
+    registry: artifactory.rafael.co.il:6001/registry.k8s.io
+    repository: kube-state-metrics/kube-state-metrics
+
+  tolerations:
+  - key: "statefulset/special-taint"
+    operator: "Equal"
+  affinity:
+    nodeAffinity:
+     requiredDuringSchedulingIgnoredDuringExecution:
+       nodeSelectorTerms:
+       - matchExpressions:
+         - key: statefulset/special-taint
+           operator: In
+           values:
+           - stateful
+
+nodeExporter:
+  enabled: true
+
+prometheus-node-exporter:
+  image:
+    registry: artifactory.rafael.co.il:6001/quay.io
+    repository: prometheus/node-exporter
+  
+  service:
+    enabled: true
+    type: ClusterIP
+    clusterIP: ""
+    port: 9100
+    targetPort: 9100
+    nodePort:
+    portName: metrics
+  
+  tolerations:
+  - key: "statefulset/special-taint"
+    operator: "Equal"
+  affinity:
+    nodeAffinity:
+     requiredDuringSchedulingIgnoredDuringExecution:
+       nodeSelectorTerms:
+       - matchExpressions:
+         - key: statefulset/special-taint
+           operator: In
+           values:
+           - stateful
+
+prometheusOperator:
+  enabled: true
+  admissionWebhooks:
+    enabled: false
+    
+  image:
+    registry: artifactory.rafael.co.il:6001/quay.io
+    repository: prometheus-operator/prometheus-operator
+  
+  prometheusConfigReloader:
+    image:
+      registry: quay.io
+      repository: prometheus-operator/prometheus-config-reloader
+
+
+  tolerations:
+  - key: "statefulset/special-taint"
+    operator: "Equal"
+  affinity:
+    nodeAffinity:
+     requiredDuringSchedulingIgnoredDuringExecution:
+       nodeSelectorTerms:
+       - matchExpressions:
+         - key: statefulset/special-taint
+           operator: In
+           values:
+           - stateful    
+
+prometheus:
+  enabled: true
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+    hosts: 
+      - "prometheus.tsgs.aws2.rafael.co.il"
+    tls:
+       - secretName: tsgs-cicd-aws-wildcard-cert
+         hosts:
+           - prometheus.tsgs.aws2.rafael.co.il
+  
+  prometheusSpec:
+    enableRemoteWriteReceiver: true
+    enableAdminAPI: true
+    automountServiceAccountToken: true
+    image:
+        registry: artifactory.rafael.co.il:6001/quay.io
+        repository: prometheus/prometheus
+        tag: v2.53.0
+
+    tolerations:
+    - key: "statefulset/special-taint"
+      operator: "Equal"
+    affinity:
+      nodeAffinity:
+       requiredDuringSchedulingIgnoredDuringExecution:
+         nodeSelectorTerms:
+         - matchExpressions:
+           - key: statefulset/special-taint
+             operator: In
+             values:
+             - stateful    
+
+    storageSpec:
+     volumeClaimTemplate:
+       spec:
+         storageClassName: prometheus-sc
+         accessModes: ["ReadWriteOnce"]
+         resources:
+           requests:
+             storage: 50Gi    
+    additionalScrapeConfigs:
+      - job_name: 'elasticsearch'
+        scrape_interval: 10s
+        metrics_path: /metrics
+        scheme: http
+        static_configs:
+        - targets: ['elastic-exporter.general.svc.cluster.local:9114']
+      - job_name: 'kminion-kafka-cicd-flight'
+        scrape_interval: 10s
+        metrics_path: /metrics
+        scheme: http
+        static_configs:
+        - targets: ['kminion-cicd-flight.rafael-tsgs-cicd-flight.svc.cluster.local:8080']
+      - job_name: 'kminion-kafka-test-flight'
+        scrape_interval: 10s
+        metrics_path: /metrics
+        scheme: http
+        static_configs:
+        - targets: ['kminion-test-flight.rafael-tsgs-test-flight.svc.cluster.local:8080']
+      - job_name: 'kminion-kafka-test-mission'
+        scrape_interval: 10s
+        metrics_path: /metrics
+        scheme: http
+        static_configs:
+        - targets: ['kminion-test-mission.rafael-tsgs-test-mission.svc.cluster.local:8080']
+      - job_name: 'kminion-kafka-cicd-mission'
+        scrape_interval: 10s
+        metrics_path: /metrics
+        scheme: http
+        static_configs:
+        - targets: ['kminion-cicd-mission.rafael-tsgs-cicd-mission.svc.cluster.local:8080']
+      - job_name: 'kminion-kafka-dev-mission'
+        scrape_interval: 10s
+        metrics_path: /metrics
+        scheme: http
+        static_configs:
+        - targets: ['kminion-dev-mission.rafael-tsgs-dev-mission.svc.cluster.local:8080']  
+      - job_name: 'nginx-ingress'
+        scrape_interval: 10s
+        metrics_path: /metrics
+        scheme: http
+        static_configs:
+        - targets: ['nginx-ingress-ingress-nginx-controller-metrics.anns-infra.svc.cluster.local:10254']  
+      - job_name: 'otel-collector-cicd-flight'
+        scrape_interval: 10s
+        metrics_path: /metrics
+        scheme: https
+        static_configs:
+        - targets: ['otel-metrics-rafael-tsgs-cicd-flight.apps.rosa-rf-cluster.61sb.p1.openshiftapps.com']
+      - job_name: 'otel-collector-cicd-mission'
+        scrape_interval: 10s
+        metrics_path: /metrics
+        scheme: https
+        static_configs:
+        - targets: ['otel-metrics-rafael-tsgs-cicd-mission.apps.rosa-rf-cluster.61sb.p1.openshiftapps.com']
+      - job_name: 'otel-collector-dev-flight'
+        scrape_interval: 10s
+        metrics_path: /metrics
+        scheme: https
+        static_configs:
+        - targets: ['otel-metrics-rafael-tsgs-dev-flight.apps.rosa-rf-cluster.61sb.p1.openshiftapps.com']
+      - job_name: 'otel-collector-dev-mission'
+        scrape_interval: 10s
+        metrics_path: /metrics
+        scheme: https
+        static_configs:
+        - targets: ['otel-metrics-rafael-tsgs-dev-mission.apps.rosa-rf-cluster.61sb.p1.openshiftapps.com']
+      - job_name: 'otel-collector-test-flight'
+        scrape_interval: 10s
+        metrics_path: /metrics
+        scheme: https
+        static_configs:
+        - targets: ['otel-metrics-rafael-tsgs-test-flight.apps.rosa-rf-cluster.61sb.p1.openshiftapps.com']
+      - job_name: 'otel-collector-test-mission'
+        scrape_interval: 10s
+        metrics_path: /metrics
+        scheme: https
+        static_configs:
+        - targets: ['otel-metrics-rafael-tsgs-test-mission.apps.rosa-rf-cluster.61sb.p1.openshiftapps.com']
+      - job_name: 'otel-collector-kyverno'
+        scrape_interval: 10s
+        metrics_path: /metrics
+        scheme: https
+        static_configs:
+        - targets: ['otel-metrics-kyverno.apps.rosa-rf-cluster.61sb.p1.openshiftapps.com']
+      - job_name: karpenter
+        kubernetes_sd_configs:
+        - role: endpoints
+          namespaces:
+            names:
+            - karpenter
+        relabel_configs:
+        - source_labels: [__meta_kubernetes_endpoint_port_name]
+          regex: http-metrics
+          action: keep
+      - job_name: 'otel-collector-adlg-cicd'
+        scrape_interval: 10s
+        metrics_path: /metrics
+        scheme: https
+        static_configs:
+        - targets: ['otel-metrics-rafael-adlg-cicd.apps.rosa-rf-cluster.61sb.p1.openshiftapps.com']
+      - job_name: 'otel-collector-adlg-test'
+        scrape_interval: 10s
+        metrics_path: /metrics
+        scheme: https
+        static_configs:
+        - targets: ['otel-metrics-rafael-adlg-test.apps.rosa-rf-cluster.61sb.p1.openshiftapps.com']
+      - job_name: 'trivy-infra'
+        scrape_interval: 10s
+        metrics_path: /metrics
+        scheme: http
+        static_configs:
+        - targets: ['trivy-operator.trivy-operator.svc.cluster.local:80']  
+      - job_name: 'kafka4'
+        scrape_interval: 10s
+        metrics_path: /metrics
+        scheme: http
+        static_configs:
+        - targets: ['kafka-rafael-tsgs-cicd-flight-jmx-metrics.rafael-tsgs-cicd-flight.svc.cluster.local:5556']
+      - job_name: 'pg16-cicd-flight'
+        scrape_interval: 10s
+        metrics_path: /metrics
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names:
+                - rafael-tsgs-cicd-flight
+            selectors:
+              - role: "pod"
+                label: "cnpg.io/cluster=cicd-flight-cluster-pg"
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+
+
+
+
+
+

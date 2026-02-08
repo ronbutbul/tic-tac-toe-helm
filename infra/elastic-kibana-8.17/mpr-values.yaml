@@ -51,6 +51,11 @@ metrics:
   #     - tsinf-reg
   serviceAccount:
     create: false
+
+image:
+  registry: docker.io
+  repository: bitnamilegacy/elasticsearch
+  tag: 8.17.1-debian-12-r0
     
 global:
   security:

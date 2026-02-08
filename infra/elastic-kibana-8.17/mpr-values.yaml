@@ -1,0 +1,148 @@
+# image:
+#   registry: artifactory.rafael.co.il:6001
+#   repository: bitnami/elasticsearch
+#   tag: 8.17.1-debian-12-r0
+#   pullSecrets: 
+#     - tsinf-reg
+
+# config:
+#   path.repo: /opt/bitnami/snapelastic
+#   cluster.name: "docker-cluster"
+#   network.host: 0.0.0.0
+
+# snapshotRepoPath: "/opt/bitnami/snapelastic"
+# extraVolumes:
+#   - name: snapelastic
+#     persistentVolumeClaim:
+#       claimName: snapelastic
+# extraVolumeMounts:
+#   - name: snapelastic
+#     mountPath: /opt/bitnami/snapelastic
+
+fullnameOverride: "elasticsearch"
+
+ingress:
+  enabled: true
+  ingressClassName: "nginx"
+  hostname: elasticsearch.testmpr.aws2.rafael.co.il
+  path: /
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "200m"
+metrics:
+  enabled: true
+  # image:
+  #   registry: artifactory.rafael.co.il:6001
+  #   repository: bitnami/elasticsearch-exporter
+  #   tag: 1.8.0-debian-12-r7
+  #   pullSecrets:
+  #     - tsinf-reg
+  serviceAccount:
+    create: false
+    
+global:
+  security:
+    allowInsecureImages: true
+  kibanaEnabled: true
+  # imagePullSecrets: tsinf-reg
+  defaultStorageClass: "efs-sc"
+
+master:
+  replicaCount: 3
+  persistence:
+    storageClass: "elastic-sc"
+    size: 20Gi  
+  serviceAccount:
+    create: false
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "2Gi"
+    limits:
+      cpu: "500m"
+      memory: "2Gi"
+  heapSize: 1024m
+data:
+  replicaCount: 3  
+  persistence:
+    storageClass: "efs-sc"
+    size: 300Gi
+
+  serviceAccount:
+    create: false
+  resources:
+    requests:
+      cpu: "1000m"
+      memory: "4Gi"
+    limits:
+      cpu: "1000m"
+      memory: "4Gi"
+  heapSize: 4096m
+coordinating:
+  replicaCount: 3  
+  serviceAccount:
+    create: false
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "4Gi"
+    limits:
+      cpu: "500m"
+      memory: "4Gi"
+  heapSize: 2048m  
+ingest:
+  enabled: false
+  # replicaCount: 3
+  # serviceAccount:
+  #   create: false
+  # resources:
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "8Gi"
+  #   limits:
+  #     cpu: "500m"
+  #     memory: "8Gi"
+  # heapSize: 4096m   
+kibana:
+  fullnameOverride: "kibana"
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+  # image:
+  #   pullSecrets:
+  #     - tsinf-reg  
+  #   registry: artifactory.rafael.co.il:6001
+  #   repository: bitnami/kibana
+  #   tag: 8.17.0-debian-12-r0
+  persistence:
+    enabled: false
+  configuration:
+    server:
+      publicBaseUrl: "http://kibana.testmpr.aws2.rafael.co.il:5601"    
+  ingress:
+    enabled: true
+    hostname: kibana.testmpr.aws2.rafael.co.il
+    ingressClassName: "nginx"    
+# postInstall:
+#   replicas: 2
+#   # image: "artifactory.rafael.co.il:6001/infra/curlimages/curl:8.2.0"
+#   # imagePullSecrets:
+#   # - name: tsinf-reg
+#   resources:
+#     requests:
+#       cpu: "100m"
+#       memory: "2Gi"
+#     limits:
+#       cpu: "100m"
+#       memory: "2Gi"
+    
+# sysctlImage:
+#   registry: artifactory.rafael.co.il:6001
+#   repository: bitnami/os-shell
+#   tag: 12-debian-12-r35
+extraConfig:
+  http:
+    max_content_length: "200mb"

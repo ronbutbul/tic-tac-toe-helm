@@ -62,7 +62,7 @@ global:
 master:
   replicaCount: 3
   persistence:
-    storageClass: "elastic-sc"
+    storageClass: "mongo-sc"
     size: 20Gi  
   serviceAccount:
     create: false
@@ -77,7 +77,7 @@ master:
 data:
   replicaCount: 3  
   persistence:
-    storageClass: "efs-sc"
+    storageClass: "mongo-sc"
     size: 300Gi
 
   serviceAccount:

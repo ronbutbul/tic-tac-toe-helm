@@ -1,0 +1,5 @@
+{
+  "persistent": {
+    "cluster.routing.allocation.node_concurrent_recoveries": "4"
+  }
+}

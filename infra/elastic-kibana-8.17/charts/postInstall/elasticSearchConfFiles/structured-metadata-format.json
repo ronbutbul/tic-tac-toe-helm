@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "processors": [
+    {
+      "convert": {
+        "field": "structured.metadata",
+        "type": "string",
+        "ignore_missing": true,
+        "ignore_failure": true
+      }
+    },
+    {
+      "convert": {
+        "field": "level",
+        "type": "string",
+        "ignore_missing": true,
+        "ignore_failure": true
+      }
+    },
+    {
+      "convert": {
+        "field": "structured.level",
+        "type": "string",
+        "ignore_missing": true,
+        "ignore_failure": true
+      }
+    },
+    {
+      "convert": {
+        "field": "structured.pid",
+        "type": "string",
+        "ignore_missing": true,
+        "ignore_failure": true
+      }
+    }
+  ]
+}

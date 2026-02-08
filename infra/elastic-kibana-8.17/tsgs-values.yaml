@@ -1,0 +1,274 @@
+image:
+  registry: artifactory.rafael.co.il:6001
+  repository: bitnami/elasticsearch
+  tag: 8.17.1-debian-12-r0
+  pullSecrets: 
+    - tsinf-reg
+
+# config:
+#   path.repo: /opt/bitnami/snapelastic
+#   cluster.name: "docker-cluster"
+#   network.host: 0.0.0.0
+
+snapshotRepoPath: "/opt/bitnami/snapelastic"
+extraVolumes:
+  - name: snapelastic
+    persistentVolumeClaim:
+      claimName: snapelastic
+extraVolumeMounts:
+  - name: snapelastic
+    mountPath: /opt/bitnami/snapelastic
+
+fullnameOverride: "elasticsearch"
+
+ingress:
+  enabled: true
+  ingressClassName: "nginx"
+  hostname: elasticsearch.tsgs.aws2.rafael.co.il
+  path: /
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "200m"
+metrics:
+  enabled: true
+  image:
+    registry: artifactory.rafael.co.il:6001
+    repository: bitnami/elasticsearch-exporter
+    tag: 1.8.0-debian-12-r7
+    pullSecrets:
+      - tsinf-reg
+  serviceAccount:
+    create: false
+  tolerations:
+    - key: "statefulset/special-taint"
+      operator: "Equal"
+  affinity:    
+    nodeAffinity:
+     requiredDuringSchedulingIgnoredDuringExecution:
+       nodeSelectorTerms:
+       - matchExpressions:
+         - key: statefulset/special-taint
+           operator: In
+           values:
+           - stateful
+global:
+  security:
+    allowInsecureImages: true
+  kibanaEnabled: true
+  # imagePullSecrets: tsinf-reg
+  defaultStorageClass: "elastic-sc"
+
+master:
+  # initContainers: 
+  #   - name: remove-locks-elasticsearch
+  #     image: artifactory.rafael.co.il:6001/infra/busybox:1.36.1-uclibc
+  #     securityContext:
+  #         runAsUser: 0
+  #         runAsGroup: 0
+  #         privileged: true
+  #     command: 
+  #     - sh
+  #     - -c 
+  #     - |
+  #       /bin/rm -rf /bitnami/elasticsearch/data/node.lock 
+  #       /bin/rm -rf /bitnami/elasticsearch/data/_state/write.lock
+  #       /bin/find /bitnami/elasticsearch/data/nodes -name "write.lock" -exec rm -rf {} \;
+  #       /bin/touch /bitnami/elasticsearch/data/tsgs_clean_locks_done.txt
+  #     volumeMounts:
+  #       - name: data
+  #         mountPath: /data  
+  replicaCount: 3
+  persistence:
+    storageClass: "elastic-sc"
+    size: 20Gi  
+  serviceAccount:
+    create: false
+  tolerations:
+    - key: "statefulset/special-taint"
+      operator: "Equal"
+  affinity:    
+    nodeAffinity:
+     requiredDuringSchedulingIgnoredDuringExecution:
+       nodeSelectorTerms:
+       - matchExpressions:
+         - key: statefulset/special-taint
+           operator: In
+           values:
+           - stateful
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "2Gi"
+    limits:
+      cpu: "500m"
+      memory: "2Gi"
+  heapSize: 1024m
+data:
+  replicaCount: 3  
+  persistence:
+    storageClass: "elastic-sc"
+    size: 300Gi
+
+  serviceAccount:
+    create: false
+  tolerations:
+    - key: "statefulset/special-taint"
+      operator: "Equal"
+  affinity:    
+    nodeAffinity:
+     requiredDuringSchedulingIgnoredDuringExecution:
+       nodeSelectorTerms:
+       - matchExpressions:
+         - key: statefulset/special-taint
+           operator: In
+           values:
+           - stateful
+  resources:
+    requests:
+      cpu: "3000m"
+      memory: "16Gi"
+    limits:
+      cpu: "3000m"
+      memory: "16Gi"
+  heapSize: 8192m
+coordinating:
+  replicaCount: 3  
+  # initContainers: 
+  #   - name: remove-locks-elasticsearch
+  #     image: artifactory.rafael.co.il:6001/infra/busybox:1.36.1-uclibc
+  #     securityContext:
+  #         runAsUser: 0
+  #         runAsGroup: 0
+  #         privileged: true
+  #     command: 
+  #     - sh
+  #     - -c 
+  #     - |
+  #       /bin/rm -rf /data/node.lock 
+  #       /bin/rm -rf /data/_state/write.lock
+  #       /bin/find /data/nodes -name "write.lock" -exec rm -rf {} \;
+  #       /bin/touch /data/tsgs_clean_locks_done.txt
+  #     volumeMounts:
+  #       - name: data
+  #         mountPath: /data
+
+  serviceAccount:
+    create: false
+  tolerations:
+    - key: "statefulset/special-taint"
+      operator: "Equal"
+  affinity:    
+    nodeAffinity:
+     requiredDuringSchedulingIgnoredDuringExecution:
+       nodeSelectorTerms:
+       - matchExpressions:
+         - key: statefulset/special-taint
+           operator: In
+           values:
+           - stateful
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "8Gi"
+    limits:
+      cpu: "500m"
+      memory: "8Gi"
+  heapSize: 4096m  
+ingest:
+  replicaCount: 3
+  # initContainers: 
+  #   - name: remove-locks-elasticsearch
+  #     image: artifactory.rafael.co.il:6001/infra/busybox:1.36.1-uclibc
+  #     securityContext:
+  #         runAsUser: 0
+  #         runAsGroup: 0
+  #         privileged: true
+  #     command: 
+  #     - sh
+  #     - -c 
+  #     - |
+  #       /bin/rm -rf /data/node.lock 
+  #       /bin/rm -rf /data/_state/write.lock
+  #       /bin/find /data/nodes -name "write.lock" -exec rm -rf {} \;
+  #       /bin/touch /data/tsgs_clean_locks_done.txt
+  #     volumeMounts:
+  #       - name: data
+  #         mountPath: /data
+
+  serviceAccount:
+    create: false
+  tolerations:
+    - key: "statefulset/special-taint"
+      operator: "Equal"
+  affinity:    
+    nodeAffinity:
+     requiredDuringSchedulingIgnoredDuringExecution:
+       nodeSelectorTerms:
+       - matchExpressions:
+         - key: statefulset/special-taint
+           operator: In
+           values:
+           - stateful
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "8Gi"
+    limits:
+      cpu: "500m"
+      memory: "8Gi"
+  heapSize: 4096m   
+kibana:
+  fullnameOverride: "kibana"
+  resources:
+    requests:
+      cpu: "1000m"
+      memory: "2Gi"
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
+  image:
+    pullSecrets:
+      - tsinf-reg  
+    registry: artifactory.rafael.co.il:6001
+    repository: bitnami/kibana
+    tag: 8.17.0-debian-12-r0
+  persistence:
+    enabled: false
+  configuration:
+    server:
+      publicBaseUrl: "http://kibana.tsgs.aws2.rafael.co.il:5601"    
+  ingress:
+    enabled: true
+    hostname: kibana.tsgs.aws2.rafael.co.il
+    ingressClassName: "nginx"    
+  tolerations:
+    - key: "statefulset/special-taint"
+      operator: "Equal"
+  affinity:
+    nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: statefulset/special-taint
+          operator: In
+          values:
+          - stateful
+postInstall:
+  replicas: 2
+  image: "artifactory.rafael.co.il:6001/infra/curlimages/curl:8.2.0"
+  imagePullSecrets:
+  - name: tsinf-reg
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "2Gi"
+    limits:
+      cpu: "100m"
+      memory: "2Gi"
+    
+sysctlImage:
+  registry: artifactory.rafael.co.il:6001
+  repository: bitnami/os-shell
+  tag: 12-debian-12-r35
+extraConfig:
+  http:
+    max_content_length: "200mb"

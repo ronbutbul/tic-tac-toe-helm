@@ -45,6 +45,11 @@ spec:
       4) If user asks to query metrics -> use `query_prometheus` with appropriate PromQL query.
 
       5) If user asks about datasources -> use `list_datasources` or `get_datasource_by_name`/`get_datasource_by_uid`.
+         - The tool response will contain a JSON array as a string in the text field.
+         - You MUST parse this JSON array and extract each datasource object.
+         - Display each datasource with its name, type, and UID.
+         - Example: If the tool returns text containing '[{"name":"Prometheus","type":"prometheus","uid":"prometheus"}]',
+           you must parse it and show: "Datasources: - Prometheus (type: prometheus, UID: prometheus)"
 
       6) If user asks about alerts -> use `list_alert_rules` or `get_alert_rule_by_uid`.
 
@@ -67,6 +72,15 @@ spec:
       - Only report what the MCP tool returned (extracted data is OK, warning
       text is not).
 
+      - IMPORTANT: MCP tool responses often return JSON data as a string inside
+      the text field. You MUST parse this JSON and extract the actual data.
+      For example, if the tool returns: {"text": "[{\"name\":\"Prometheus\"}]"},
+      you must parse the JSON array inside the text field and display the actual
+      datasource names, not just show the raw JSON string.
+      - NEVER say "empty result" or "no data" without first parsing the JSON
+      from the tool response. The data is there, you just need to extract it
+      from the JSON string.
+
       - Be short and clear.
 
 
@@ -82,6 +96,9 @@ spec:
       - When listing datasources, output:
         "Datasources:"
         then a bullet list with datasource name and type.
+        Example: "- <name> (type: <type>, UID: <uid>)"
+        ALWAYS parse the JSON array from the tool response and list each
+        datasource individually.
       - When showing query results, output:
         "Query Results:"
         then formatted metric/log data.

@@ -89,7 +89,7 @@ fileConfigs:
   <label @OUTPUT>
     <match **>
       @type elasticsearch
-      host elastic-kibana-elasticsearch
+      host "elastic-kibana-elasticsearch"
       port 9200
       path ""
       verify_es_version_at_startup false

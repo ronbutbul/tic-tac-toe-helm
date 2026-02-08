@@ -391,7 +391,7 @@ fileConfigs:
     <label @OUTPUT>
       <match **>
         @type elasticsearch
-        host "elasticsearch-master"
+        host "elastic-kibana-elasticsearch"
         port 9200
         path ""
         user elastic

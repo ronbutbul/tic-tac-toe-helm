@@ -121,6 +121,10 @@ ingest:
   #     memory: "8Gi"
   # heapSize: 4096m   
 kibana:
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/kibana
+    tag: 8.17.0-debian-12-r0
   fullnameOverride: "kibana"
   resources:
     requests:

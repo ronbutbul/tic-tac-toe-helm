@@ -93,14 +93,11 @@ fileConfigs:
         port 9200
         path ""
         verify_es_version_at_startup false
-
-        # IMPORTANT: fix for ES that doesn't accept _type
-        # suppress_type_name true
-
-        # # Optional but recommended: nicer index naming (daily indices)
-        # logstash_format true
-        # logstash_prefix k8s
-        # include_timestamp true
+        Suppress_Type_Name On
+        # Optional but recommended: nicer index naming (daily indices)
+        logstash_format true
+        logstash_prefix k8s
+        include_timestamp true
       </match>
     </label>
 

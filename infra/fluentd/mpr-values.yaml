@@ -85,22 +85,22 @@ fileConfigs:
       </match>
     </label>
 
-04_outputs.conf: |-
-  <label @OUTPUT>
-    <match **>
-      @type elasticsearch
-      host "elastic-kibana-elasticsearch"
-      port 9200
-      path ""
-      verify_es_version_at_startup false
+  04_outputs.conf: |-
+    <label @OUTPUT>
+      <match **>
+        @type elasticsearch
+        host "elastic-kibana-elasticsearch"
+        port 9200
+        path ""
+        verify_es_version_at_startup false
 
-      # IMPORTANT: fix for ES that doesn't accept _type
-      suppress_type_name true
+        # IMPORTANT: fix for ES that doesn't accept _type
+        suppress_type_name true
 
-      # Optional but recommended: nicer index naming (daily indices)
-      logstash_format true
-      logstash_prefix k8s
-      include_timestamp true
-    </match>
-  </label>
+        # Optional but recommended: nicer index naming (daily indices)
+        logstash_format true
+        logstash_prefix k8s
+        include_timestamp true
+      </match>
+    </label>
 

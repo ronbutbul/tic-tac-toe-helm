@@ -1,5 +1,0 @@
-{
-  "persistent": {
-    "indices.recovery.max_bytes_per_sec": "5000mb"
-  }
-}

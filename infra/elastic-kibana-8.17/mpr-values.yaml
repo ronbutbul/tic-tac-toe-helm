@@ -83,17 +83,17 @@ data:
   replicaCount: 3  
   persistence:
     storageClass: "mongo-sc"
-    size: 300Gi
+    size: 50Gi
 
   serviceAccount:
     create: false
   resources:
     requests:
-      cpu: "1000m"
-      memory: "4Gi"
+      cpu: "2000m"
+      memory: "8Gi"
     limits:
-      cpu: "1000m"
-      memory: "4Gi"
+      cpu: "2000m"
+      memory: "8Gi"
   heapSize: 4096m
 coordinating:
   replicaCount: 3  

@@ -92,8 +92,8 @@ fileConfigs:
         host "elastic-kibana-elasticsearch"
         port 9200
         path ""
-        verify_es_version_at_startup false
-        Suppress_Type_Name On
+        verify_es_version_at_startup true
+        Suppress_Type_Name true
         # Optional but recommended: nicer index naming (daily indices)
         logstash_format true
         logstash_prefix k8s

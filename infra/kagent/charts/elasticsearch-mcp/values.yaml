@@ -19,8 +19,6 @@ serviceAccount:
   create: true
   annotations: {}
   name: ""
-command:
-- stdio
   # add your other flags here
 
 securityContext: {}

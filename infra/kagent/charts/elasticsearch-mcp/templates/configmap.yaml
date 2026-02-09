@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "elasticsearch-mcp.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "elasticsearch-mcp.labels" . | nindent 4 }}
+data:
+  {{- if .Values.elasticsearch.url }}
+  ES_URL: {{ .Values.elasticsearch.url | quote }}
+  {{- else }}
+  ES_URL: "localhost:9200"
+  {{- end }}
+  DO_NOT_TRACK: "1"
+  # Custom configuration
+  {{- range $key, $value := .Values.config }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}

@@ -1,16 +1,12 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: node-debug11
+  name: node-debdugg
   namespace: default
 spec:
   hostPID: true
   hostNetwork: true
-  nodeName: i-0ee453aa6dbc75dd3   # <-- CHANGE to your GPU node name
-  tolerations:
-    - key: "nvidia.com/gpu"
-      operator: "Exists"
-      effect: "NoSchedule"
+  nodeName: i-00a15f289e0ecae20  # <-- CHANGE to your GPU node name
   containers:
     - name: debug
       image: ronbutbul135/alpine:3.19

@@ -19,6 +19,11 @@ serviceAccount:
   create: true
   annotations: {}
   name: ""
+command:
+  - /app/
+args:
+  - --transport=stdio
+  # add your other flags here
 
 securityContext: {}
   

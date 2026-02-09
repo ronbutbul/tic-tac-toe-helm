@@ -20,9 +20,7 @@ serviceAccount:
   annotations: {}
   name: ""
 command:
-  - /app/
-args:
-  - --transport=stdio
+- stdio
   # add your other flags here
 
 securityContext: {}

@@ -7,7 +7,7 @@ elasticsearch:
   # apiKey: "" # Deprecated - use serviceAccountToken instead.
 
 image:
-  registry: docker.elastic.co
+  registry: 941284018955.dkr.ecr.il-central-1.amazonaws.com
   repository: mcp/elasticsearch
   pullPolicy: Always 
   tag: "latest" # Only latest is available via docker hub at present. See https://github.com/grafana/mcp-grafana/issues/180

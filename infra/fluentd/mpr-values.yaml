@@ -10,8 +10,10 @@ fileConfigs:
       pos_file /var/log/fluentd-containers.log.pos
       tag kubernetes.*
       read_from_head true
+      emit_unmatched_lines true
       <parse>
         @type multi_format
+        unmatched_lines true
         <pattern>
           format json
           time_key time
@@ -26,7 +28,6 @@ fileConfigs:
           keep_time_key false
         </pattern>
       </parse>
-      emit_unmatched_lines true
     </source>
 
     <source>
@@ -38,11 +39,13 @@ fileConfigs:
 
   02_filters.conf: |-
     <label @KUBERNETES>
+      # drop fluentd self logs
       <match kubernetes.var.log.containers.fluentd**>
         @type relabel
         @label @FLUENT_LOG
       </match>
 
+      # enrich with k8s metadata
       <filter kubernetes.**>
         @type kubernetes_metadata
         @id filter_kube_metadata
@@ -52,45 +55,23 @@ fileConfigs:
         skip_master_url true
       </filter>
 
-      # ✅ Kafka -> send to @KAFKA and STOP (won't reach k8s)
+      # retag to kafka.* / mongo.* based on pod name
+      # (everything that doesn't match stays kubernetes.*)
       <match kubernetes.**>
-        @type relabel
-        @label @KAFKA
-        <buffer>
-          @type memory
-        </buffer>
-        <inject>
-          time_key time
-        </inject>
-        <filter>
-          @type grep
-          <regexp>
-            key $.kubernetes.pod_name
-            pattern /^bitnami-kafka-.*/
-          </regexp>
-        </filter>
+        @type rewrite_tag_filter
+        <rule>
+          key $.kubernetes.pod_name
+          pattern /^bitnami-kafka-.*/
+          tag kafka.${tag}
+        </rule>
+        <rule>
+          key $.kubernetes.pod_name
+          pattern /^mongo.*/
+          tag mongo.${tag}
+        </rule>
       </match>
 
-      # ✅ Mongo -> send to @MONGO and STOP (won't reach k8s)
-      <match kubernetes.**>
-        @type relabel
-        @label @MONGO
-        <buffer>
-          @type memory
-        </buffer>
-        <inject>
-          time_key time
-        </inject>
-        <filter>
-          @type grep
-          <regexp>
-            key $.kubernetes.pod_name
-            pattern /^mongo.*/
-          </regexp>
-        </filter>
-      </match>
-
-      # ✅ Everything else continues to normal flow
+      # send onward to dispatch/output labels
       <match **>
         @type relabel
         @label @DISPATCH
@@ -119,47 +100,73 @@ fileConfigs:
     </label>
 
   04_outputs.conf: |-
-    # ✅ Kafka only
-    <label @KAFKA>
-      <match **>
+    <label @OUTPUT>
+
+      # Kafka -> k8s-kafka-YYYY.MM.DD
+      <match kafka.**>
         @type elasticsearch
         host "elastic-kibana-elasticsearch"
         port 9200
         path ""
+        scheme http
+
         verify_es_version_at_startup true
         suppress_type_name true
+
         logstash_format true
         logstash_prefix k8s-kafka
         include_timestamp true
       </match>
-    </label>
 
-    # ✅ Mongo only
-    <label @MONGO>
-      <match **>
+      # Mongo -> k8s-mongo-YYYY.MM.DD
+      <match mongo.**>
         @type elasticsearch
         host "elastic-kibana-elasticsearch"
         port 9200
         path ""
+        scheme http
+
         verify_es_version_at_startup true
         suppress_type_name true
+
         logstash_format true
         logstash_prefix k8s-mongo
         include_timestamp true
       </match>
-    </label>
 
-    # ✅ Everything else (no kafka/mongo) -> k8s
-    <label @OUTPUT>
-      <match **>
+      # Everything else (but NOT kafka/mongo anymore because they were retagged) -> k8s-YYYY.MM.DD
+      <match kubernetes.**>
         @type elasticsearch
         host "elastic-kibana-elasticsearch"
         port 9200
         path ""
+        scheme http
+
         verify_es_version_at_startup true
         suppress_type_name true
+
         logstash_format true
         logstash_prefix k8s
         include_timestamp true
       </match>
+
+      # Optional: if something slips through with a different tag, drop it
+      <match **>
+        @type null
+      </match>
+
     </label>
+
+# ------------------------------------------------------------
+# Chart-level safety (prevents charts from injecting <buffer>
+# into relabel outputs). Keep ONLY the keys your chart supports.
+# ------------------------------------------------------------
+buffer:
+  enabled: false
+
+# sometimes charts use these names:
+# extraBuffer: {}
+# outputBuffer: {}
+# elasticsearch:
+#   buffer:
+#     enabled: false

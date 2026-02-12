@@ -39,12 +39,6 @@ resources:
     cpu: 500m
     memory: 512Mi
 
-command:
-  - elasticsearch-core-mcp-server
-
-args:
-  - stdio
-
 # Additional Arguments for the mcp server
 
 # Additional volumes on the output Deployment definition.

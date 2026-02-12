@@ -10,7 +10,7 @@ image:
   registry: ronbutbul135
   repository: elasticsearch-mcp-service
   pullPolicy: Always 
-  tag: "20260212-171133-6f64ac20" # Only latest is available via docker hub at present. See https://github.com/grafana/mcp-grafana/issues/180
+  tag: "20260212-172526-36c9253b" # Only latest is available via docker hub at present. See https://github.com/grafana/mcp-grafana/issues/180
 
 nameOverride: ""
 fullnameOverride: ""

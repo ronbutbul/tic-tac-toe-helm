@@ -1,7 +1,7 @@
 replicas: 1
 
 elasticsearch:
-  url: ""
+  url: "http://elastic-kibana-elasticsearch:9200"
   serverUrl: ""
   # serviceAccountToken: ""
   # apiKey: "" # Deprecated - use serviceAccountToken instead.

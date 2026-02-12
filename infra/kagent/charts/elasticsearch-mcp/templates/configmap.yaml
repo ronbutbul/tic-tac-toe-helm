@@ -7,9 +7,9 @@ metadata:
     {{- include "elasticsearch-mcp.labels" . | nindent 4 }}
 data:
   {{- if .Values.elasticsearch.url }}
-  ES_URL: {{ .Values.elasticsearch.url | quote }}
+  ES_MCP_CONNECTION_STRING: {{ .Values.elasticsearch.url | quote }}
   {{- else }}
-  ES_URL: "localhost:9200"
+  ES_MCP_CONNECTION_STRING: "localhost:9200"
   {{- end }}
   DO_NOT_TRACK: "1"
   # Custom configuration

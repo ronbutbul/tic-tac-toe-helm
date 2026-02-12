@@ -18,17 +18,5 @@ vpc:
     privateAccess: true
     publicAccess: false   # <— disables the public endpoint
  
-# managedNodeGroups:
-#   - name: tic-workers
-#     minSize: 1
-#     maxSize: 3
-#     instanceType: t3.medium
-#     desiredCapacity: 3
-#     volumeSize: 50
-#     privateNetworking: true
-#     ssh:
-#       allow: true
-#       publicKeyPath: ~/.ssh/id_rsa.pub
 autoModeConfig:
-  # defaults to false
   enabled: true      

@@ -2,7 +2,6 @@ variant: elasticsearch8
 
 fileConfigs:
   01_sources.conf: |-
-    ## logs from podman
     <source>
       @type tail
       @id in_tail_container_logs
@@ -30,7 +29,6 @@ fileConfigs:
       emit_unmatched_lines true
     </source>
 
-    # expose metrics in prometheus format
     <source>
       @type prometheus
       bind 0.0.0.0
@@ -54,21 +52,45 @@ fileConfigs:
         skip_master_url true
       </filter>
 
-      # ✅ Retag by pod_name -> kafka.*, mongo.*, or keep kubernetes.*
+      # ✅ Kafka -> send to @KAFKA and STOP (won't reach k8s)
       <match kubernetes.**>
-        @type rewrite_tag_filter
-        <rule>
-          key $.kubernetes.pod_name
-          pattern /^bitnami-kafka-.*/
-          tag kafka.${tag}
-        </rule>
-        <rule>
-          key $.kubernetes.pod_name
-          pattern /^mongo.*/
-          tag mongo.${tag}
-        </rule>
+        @type relabel
+        @label @KAFKA
+        <buffer>
+          @type memory
+        </buffer>
+        <inject>
+          time_key time
+        </inject>
+        <filter>
+          @type grep
+          <regexp>
+            key $.kubernetes.pod_name
+            pattern /^bitnami-kafka-.*/
+          </regexp>
+        </filter>
       </match>
 
+      # ✅ Mongo -> send to @MONGO and STOP (won't reach k8s)
+      <match kubernetes.**>
+        @type relabel
+        @label @MONGO
+        <buffer>
+          @type memory
+        </buffer>
+        <inject>
+          time_key time
+        </inject>
+        <filter>
+          @type grep
+          <regexp>
+            key $.kubernetes.pod_name
+            pattern /^mongo.*/
+          </regexp>
+        </filter>
+      </match>
+
+      # ✅ Everything else continues to normal flow
       <match **>
         @type relabel
         @label @DISPATCH
@@ -97,36 +119,39 @@ fileConfigs:
     </label>
 
   04_outputs.conf: |-
+    # ✅ Kafka only
+    <label @KAFKA>
+      <match **>
+        @type elasticsearch
+        host "elastic-kibana-elasticsearch"
+        port 9200
+        path ""
+        verify_es_version_at_startup true
+        suppress_type_name true
+        logstash_format true
+        logstash_prefix k8s-kafka
+        include_timestamp true
+      </match>
+    </label>
+
+    # ✅ Mongo only
+    <label @MONGO>
+      <match **>
+        @type elasticsearch
+        host "elastic-kibana-elasticsearch"
+        port 9200
+        path ""
+        verify_es_version_at_startup true
+        suppress_type_name true
+        logstash_format true
+        logstash_prefix k8s-mongo
+        include_timestamp true
+      </match>
+    </label>
+
+    # ✅ Everything else (no kafka/mongo) -> k8s
     <label @OUTPUT>
-
-      # ✅ Kafka pods -> k8s-kafka-YYYY.MM.DD
-      <match kafka.**>
-        @type elasticsearch
-        host "elastic-kibana-elasticsearch"
-        port 9200
-        path ""
-        verify_es_version_at_startup true
-        suppress_type_name true
-        logstash_format true
-        logstash_prefix kafka
-        include_timestamp true
-      </match>
-
-      # ✅ Mongo pods -> k8s-mongo-YYYY.MM.DD
-      <match mongo.**>
-        @type elasticsearch
-        host "elastic-kibana-elasticsearch"
-        port 9200
-        path ""
-        verify_es_version_at_startup true
-        suppress_type_name true
-        logstash_format true
-        logstash_prefix mongo
-        include_timestamp true
-      </match>
-
-      # ✅ Everything else -> k8s-YYYY.MM.DD
-      <match kubernetes.**>
+      <match **>
         @type elasticsearch
         host "elastic-kibana-elasticsearch"
         port 9200
@@ -137,5 +162,4 @@ fileConfigs:
         logstash_prefix k8s
         include_timestamp true
       </match>
-
     </label>

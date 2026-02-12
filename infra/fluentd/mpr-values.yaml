@@ -87,17 +87,27 @@ fileConfigs:
 
   04_outputs.conf: |-
     <label @OUTPUT>
-      <match **>
+    
+      # ✅ ONLY Kafka pods (bitnami-kafka-*)
+      <match kubernetes.var.log.containers.bitnami-kafka-**>
         @type elasticsearch
         host "elastic-kibana-elasticsearch"
         port 9200
         path ""
+    
         verify_es_version_at_startup true
-        Suppress_Type_Name true
-        # Optional but recommended: nicer index naming (daily indices)
+        suppress_type_name true
+    
         logstash_format true
-        logstash_prefix k8s
+        logstash_prefix kafka
         include_timestamp true
       </match>
+    
+      # ❌ everything else - drop
+      <match **>
+        @type null
+      </match>
+    
     </label>
+
 

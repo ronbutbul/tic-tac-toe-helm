@@ -1,4 +1,5 @@
 variant: elasticsearch8
+
 fileConfigs:
   01_sources.conf: |-
     ## logs from podman
@@ -22,7 +23,7 @@ fileConfigs:
         <pattern>
           format regexp
           expression /^(?<time>.+) (?<stream>stdout|stderr)( (.))? (?<log>.*)$/
-          time_format '%Y-%m-%dT%H:%M:%S.%NZ'
+          time_format "%Y-%m-%dT%H:%M:%S.%NZ"
           keep_time_key false
         </pattern>
       </parse>
@@ -44,11 +45,6 @@ fileConfigs:
         @label @FLUENT_LOG
       </match>
 
-      # <match kubernetes.var.log.containers.**_kube-system_**>
-      #   @type null
-      #   @id ignore_kube_system_logs
-      # </match>
-
       <filter kubernetes.**>
         @type kubernetes_metadata
         @id filter_kube_metadata
@@ -57,6 +53,21 @@ fileConfigs:
         skip_namespace_metadata true
         skip_master_url true
       </filter>
+
+      # ✅ Retag by pod_name -> kafka.*, mongo.*, or keep kubernetes.*
+      <match kubernetes.**>
+        @type rewrite_tag_filter
+        <rule>
+          key $.kubernetes.pod_name
+          pattern /^bitnami-kafka-.*/
+          tag kafka.${tag}
+        </rule>
+        <rule>
+          key $.kubernetes.pod_name
+          pattern /^mongo.*/
+          tag mongo.${tag}
+        </rule>
+      </match>
 
       <match **>
         @type relabel
@@ -87,27 +98,44 @@ fileConfigs:
 
   04_outputs.conf: |-
     <label @OUTPUT>
-    
-      # ✅ ONLY Kafka pods (bitnami-kafka-*)
-      <match kubernetes.var.log.containers.bitnami-kafka-**>
+
+      # ✅ Kafka pods -> k8s-kafka-YYYY.MM.DD
+      <match kafka.**>
         @type elasticsearch
         host "elastic-kibana-elasticsearch"
         port 9200
         path ""
-    
         verify_es_version_at_startup true
         suppress_type_name true
-    
         logstash_format true
         logstash_prefix kafka
         include_timestamp true
       </match>
-    
-      # ❌ everything else - drop
-      <match **>
-        @type null
+
+      # ✅ Mongo pods -> k8s-mongo-YYYY.MM.DD
+      <match mongo.**>
+        @type elasticsearch
+        host "elastic-kibana-elasticsearch"
+        port 9200
+        path ""
+        verify_es_version_at_startup true
+        suppress_type_name true
+        logstash_format true
+        logstash_prefix mongo
+        include_timestamp true
       </match>
-    
+
+      # ✅ Everything else -> k8s-YYYY.MM.DD
+      <match kubernetes.**>
+        @type elasticsearch
+        host "elastic-kibana-elasticsearch"
+        port 9200
+        path ""
+        verify_es_version_at_startup true
+        suppress_type_name true
+        logstash_format true
+        logstash_prefix k8s
+        include_timestamp true
+      </match>
+
     </label>
-
-

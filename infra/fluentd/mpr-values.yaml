@@ -114,7 +114,7 @@ fileConfigs:
         suppress_type_name true
 
         logstash_format true
-        logstash_prefix k8s-kafka
+        logstash_prefix kafka
         include_timestamp true
       </match>
 
@@ -130,7 +130,7 @@ fileConfigs:
         suppress_type_name true
 
         logstash_format true
-        logstash_prefix k8s-mongo
+        logstash_prefix mongo
         include_timestamp true
       </match>
 

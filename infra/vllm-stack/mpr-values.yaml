@@ -1,4 +1,4 @@
-servingEngineSpec:
+lservingEngineSpec:
   runtimeClassName: "nvidia"
   tolerations:
     - key: "nvidia.com/gpu"
@@ -42,6 +42,8 @@ servingEngineSpec:
           value: "1"    
         - name: TIKTOKEN_ENCODINGS_BASE
           value: "/data/gpt-oss-20b/tiktoken_encodings"
+        - name: VLLM_TOOL_JSON_ERROR_AUTOMATIC_RETRY
+          value: "1"        
       vllmConfig:
         maxModelLen: 131072
         dtype: "auto"
@@ -52,15 +54,12 @@ servingEngineSpec:
           - "--gpu-memory-utilization"
           - "0.95"
           - "--disable-log-requests"
-          - "--tool-call-parser"
-          - "openai"
-          - "--enable-auto-tool-choice"
+          # - "--tool-call-parser"
+          # - "openai"
+          # - "--enable-auto-tool-choice"
           # Long-context enablers / limits
           - "--max-num-batched-tokens"
           - "131072"
-          - "--max-num-seqs"
-          - "1"
-          - "--enable-chunked-prefill"          
       hf_token: ""
 
 routerSpec:

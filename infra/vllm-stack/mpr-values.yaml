@@ -1,4 +1,4 @@
-lservingEngineSpec:
+servingEngineSpec:
   runtimeClassName: "nvidia"
   tolerations:
     - key: "nvidia.com/gpu"

@@ -54,9 +54,9 @@ lservingEngineSpec:
           - "--gpu-memory-utilization"
           - "0.95"
           - "--disable-log-requests"
-          - "--tool-call-parser"
-          - "openai"
-          - "--enable-auto-tool-choice"
+          # - "--tool-call-parser"
+          # - "openai"
+          # - "--enable-auto-tool-choice"
           # Long-context enablers / limits
           - "--max-num-batched-tokens"
           - "131072"

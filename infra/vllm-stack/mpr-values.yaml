@@ -43,7 +43,7 @@ servingEngineSpec:
         - name: TIKTOKEN_ENCODINGS_BASE
           value: "/data/gpt-oss-20b/tiktoken_encodings"
       vllmConfig:
-        maxModelLen: 8092
+        maxModelLen: 131072
         dtype: "auto"
         extraArgs:
           # tokenizer override is optional but safe
@@ -55,6 +55,12 @@ servingEngineSpec:
           - "--tool-call-parser"
           - "openai"
           - "--enable-auto-tool-choice"
+          # Long-context enablers / limits
+          - "--max-num-batched-tokens"
+          - "131072"
+          - "--max-num-seqs"
+          - "1"
+          - "--enable-chunked-prefill"          
       hf_token: ""
 
 routerSpec:

@@ -45,7 +45,7 @@ servingEngineSpec:
         - name: VLLM_TOOL_JSON_ERROR_AUTOMATIC_RETRY
           value: "1"        
       vllmConfig:
-        maxModelLen: 131072
+        maxModelLen: 70000
         dtype: "auto"
         extraArgs:
           # tokenizer override is optional but safe

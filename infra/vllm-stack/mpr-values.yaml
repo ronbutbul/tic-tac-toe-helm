@@ -56,7 +56,7 @@ servingEngineSpec:
           - "--disable-log-requests"
           - "--enable-auto-tool-choice"
           - "--tool-call-parser"
-          - "hermes"
+          - "openai"
 
       hf_token: ""
 

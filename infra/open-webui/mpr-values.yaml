@@ -4,6 +4,9 @@ image:
 ollama:
   enabled: false
 
+ollamaUrls:
+  - "http://vllm-llama3-engine-service/v1"
+
 ingress:
   enabled: true
   class: "nginx"

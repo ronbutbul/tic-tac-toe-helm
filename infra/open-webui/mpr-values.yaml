@@ -1,5 +1,5 @@
 image:
-  repository: ghcr.io/open-webui/open-webui
+  repository: 941284018955.dkr.ecr.il-central-1.amazonaws.com/open-webui/open-webui
 
 ollama:
   enabled: false
@@ -15,3 +15,9 @@ ingress:
 
 pipelines:
   enabled: false
+
+
+websocket:
+  redis:
+    image:
+      repository: 941284018955.dkr.ecr.il-central-1.amazonaws.com/redis

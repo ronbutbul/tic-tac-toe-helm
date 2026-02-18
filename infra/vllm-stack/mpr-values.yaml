@@ -54,12 +54,8 @@ servingEngineSpec:
           - "--gpu-memory-utilization"
           - "0.95"
           - "--disable-log-requests"
-          # - "--tool-call-parser"
-          # - "openai"
-          # - "--enable-auto-tool-choice"
-          # Long-context enablers / limits
-          - "--max-num-batched-tokens"
-          - "131072"
+          - "--enable-auto-tool-choice"
+
       hf_token: ""
 
 routerSpec:

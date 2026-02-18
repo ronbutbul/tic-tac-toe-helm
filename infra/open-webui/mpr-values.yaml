@@ -13,3 +13,5 @@ ingress:
   tls: true
   existingSecret: "testmpr-aws-wildcard-cert"
 
+pipelines:
+  enabled: false

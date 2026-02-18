@@ -42,10 +42,8 @@ servingEngineSpec:
           value: "1"    
         - name: TIKTOKEN_ENCODINGS_BASE
           value: "/data/gpt-oss-20b/tiktoken_encodings"
-        - name: VLLM_TOOL_JSON_ERROR_AUTOMATIC_RETRY
-          value: "1"        
       vllmConfig:
-        maxModelLen: 40000
+        maxModelLen: 40192
         dtype: "auto"
         extraArgs:
           # tokenizer override is optional but safe

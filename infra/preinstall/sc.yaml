@@ -1,0 +1,16 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: efs-sc-vllm
+parameters:
+  basePath: /dynamic_provisioning
+  directoryPerms: "750"
+  ensureUniqueDirectory: "true"
+  fileSystemId: fs-093a1db32153f8479
+  gidRangeEnd: "2000"
+  gidRangeStart: "1000"
+  provisioningMode: efs-ap
+  subPathPattern: /subPath
+provisioner: efs.csi.aws.com
+reclaimPolicy: Retain
+volumeBindingMode: Immediate

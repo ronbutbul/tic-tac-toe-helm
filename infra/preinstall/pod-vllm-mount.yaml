@@ -1,9 +1,18 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: model1-loader
+  name: model1-loader1
 spec:
   restartPolicy: Never
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: karpenter.sh/capacity-type
+                operator: In
+                values:
+                  - on-demand  
   containers:
     - name: loader
       image: docker.io/ronbutbul135/ubuntu:22.04

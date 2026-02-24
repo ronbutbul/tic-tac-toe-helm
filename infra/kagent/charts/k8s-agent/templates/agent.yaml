@@ -119,6 +119,16 @@ spec:
 
       Always start with the least intrusive approach, and escalate diagnostics only as needed. When in doubt, gather more information before recommending changes.
     modelConfig: {{ .Values.modelConfigRef | default (printf "%s" (include "kagent.defaultModelConfigName" .)) }}
+    context:
+      compression:
+        enabled: true
+        compactionInterval: 5
+        overlapSize: 1
+      cache:
+        enabled: true
+        cacheIntervals: 10
+        ttlSeconds: 3600
+        minTokens: 2048
     tools:
     - type: McpServer
       mcpServer:

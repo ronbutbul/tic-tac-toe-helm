@@ -1,0 +1,21 @@
+apiVersion: eks.amazonaws.com/v1
+kind: NodeClass
+metadata:
+  finalizers:
+  - eks.amazonaws.com/termination
+  name: new
+spec:
+  ephemeralStorage:
+    iops: 3000
+    size: 80Gi
+    throughput: 125
+  networkPolicy: DefaultAllow
+  networkPolicyEventLogs: Disabled
+  role: eksctl-tic-automode-cluster-AutoModeNodeRole-CyfXzGjawZzw
+  securityGroupSelectorTerms:
+  - id: sg-0817e05c7ee1a2f05
+  snatPolicy: Random
+  subnetSelectorTerms:
+  - id: subnet-08bc4d421b397a594
+  - id: subnet-0f6d44ce6c4818cf0
+  - id: subnet-0cfcb45bdcbf3b9bb

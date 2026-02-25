@@ -86,8 +86,8 @@ cacheserverSpec:
   serde: "naive"
 
   # -- Cache server image (reusing the vllm image)
-  repository: "vllm/vllm-openai"
-  tag: "v0.14.1"
+  repository: "lmcache/vllm-openai"
+  tag: "latest-nightly"
 
   # TODO (Jiayi): please adjust this once we have evictor
   # -- router resource requests and limits

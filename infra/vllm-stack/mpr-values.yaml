@@ -21,9 +21,10 @@ servingEngineSpec:
       storageClass: efs-sc-vllm
       pvcStorage: "200Gi"
       pvcAccessMode: ["ReadWriteMany"]
-      # lmcacheConfig: 
-      #   enabled: true
-      #   cpuOffloadingBufferSize: "10"
+      lmcacheConfig: 
+        enabled: true
+        cpuOffloadingBufferSize: "10"
+        logLevel: "DEBUG"
       env:
         - name: HF_HUB_OFFLINE
           value: "1"
@@ -45,7 +46,7 @@ servingEngineSpec:
           value: "/data/gpt-oss-20b/tiktoken_encodings"
       vllmConfig:
         # enableChunkedPrefill: false
-        # enablePrefixCaching: false
+        enablePrefixCaching: true
         maxModelLen: 40192
         dtype: "auto"
         extraArgs:
@@ -58,7 +59,22 @@ servingEngineSpec:
           - "--tool-call-parser"
           - "openai"
       hf_token: ""
+      initContainer:
+        name: "wait-for-cache-server"
+        image: lmcache/vllm-openai:latest-nightly
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            timeout 60 bash -c '
+            while true; do
+              /opt/venv/bin/python3 /workspace/LMCache/examples/kubernetes/health_probe.py $(RELEASE_NAME)-cache-server-service $(LMCACHE_SERVER_SERVICE_PORT) && exit 0
+              echo "Waiting for LMCache server..."
+              sleep 2
+            done'
 
+cacheserverSpec:
+  # -- Number of replicas
+  replicaCount: 1
 routerSpec:
   repository: "941284018955.dkr.ecr.il-central-1.amazonaws.com/vllm/lmstack-router"
   tag: "latest"

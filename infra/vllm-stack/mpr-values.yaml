@@ -54,8 +54,6 @@ servingEngineSpec:
           - "--enable-auto-tool-choice"
           - "--tool-call-parser"
           - "openai"
-          - "--guided-decoding-backend"
-          - "outlines"
       hf_token: ""
 
 routerSpec:

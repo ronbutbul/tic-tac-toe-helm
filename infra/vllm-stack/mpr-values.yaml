@@ -23,7 +23,7 @@ servingEngineSpec:
       pvcAccessMode: ["ReadWriteMany"]
       lmcacheConfig: 
         enabled: true
-        cpuOffloadingBufferSize: "20"
+        cpuOffloadingBufferSize: "10"
       env:
         - name: HF_HUB_OFFLINE
           value: "1"

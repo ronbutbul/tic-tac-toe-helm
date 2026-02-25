@@ -7,10 +7,11 @@ servingEngineSpec:
   modelSpec:
     - name: "llama3"
 
-      repository: "vllm/vllm-openai"
-      tag: "v0.14.1"          # PIN — no latest
-      imagePullPolicy: "Always" 
-
+      # repository: "vllm/vllm-openai"
+      # tag: "v0.14.1"          # PIN — no latest
+      # imagePullPolicy: "Always" 
+      repository: "lmcache/vllm-openai"
+      tag: "latest-nightly"
       # Passed positionally to: vllm serve <modelURL>
       modelURL: "/data/gpt-oss-20b"
       replicaCount: 1
@@ -23,6 +24,7 @@ servingEngineSpec:
       pvcAccessMode: ["ReadWriteMany"]
       lmcacheConfig: 
         enabled: true
+        enableController: true
         cpuOffloadingBufferSize: "10"
         logLevel: "DEBUG"
       env:

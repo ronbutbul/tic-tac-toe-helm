@@ -75,6 +75,42 @@ servingEngineSpec:
 cacheserverSpec:
   # -- Number of replicas
   replicaCount: 1
+
+  # -- Container port
+  containerPort: 8080
+
+  # -- Service port
+  servicePort: 81
+
+  # -- Serializer/Deserializer type
+  serde: "naive"
+
+  # -- Cache server image (reusing the vllm image)
+  repository: "vllm/vllm-openai"
+  tag: "v0.14.1"
+
+  # TODO (Jiayi): please adjust this once we have evictor
+  # -- router resource requests and limits
+  resources:
+    requests:
+      cpu: "4"
+      memory: "8G"
+    limits:
+      cpu: "4"
+      memory: "10G"
+
+  # -- (Optional) Liveness probe for the cache server, available in vllm-openai:latest-nightly
+  # livenessProbe:
+  #   initialDelaySeconds: 30
+  #   periodSeconds: 10
+  #   failureThreshold: 3
+  #   timeoutSeconds: 5
+
+  # -- Customized labels for the cache server deployment
+  labels:
+    environment: "cacheserver"
+    release: "cacheserver"
+
 routerSpec:
   repository: "941284018955.dkr.ecr.il-central-1.amazonaws.com/vllm/lmstack-router"
   tag: "latest"

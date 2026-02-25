@@ -187,5 +187,8 @@ spec:
             - "Audit my network policies."
             - "Identify potential security vulnerabilities in my cluster."
     deployment:
+      env:
+        - name: KAGENT_CONTEXT_CONFIG
+          value: '{"compression":{"enabled":true,"compactionInterval":5,"overlapSize":1}}'
       resources:
         {{- toYaml .Values.resources | nindent 8 }}

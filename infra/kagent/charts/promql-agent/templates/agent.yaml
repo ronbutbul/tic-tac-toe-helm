@@ -201,6 +201,9 @@ spec:
             - "What are some best practices for choosing the time window in PromQL range vector selectors?"
             - "How does vector matching work in PromQL, for example, with `on() `and `group_left()`?"
     deployment:
+      env:
+        - name: KAGENT_CONTEXT_CONFIG
+          value: '{"compression":{"enabled":true,"compactionInterval":5,"overlapSize":1}}'
       resources:
         {{- toYaml .Values.resources | nindent 8 }}
       

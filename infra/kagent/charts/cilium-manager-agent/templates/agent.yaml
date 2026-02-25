@@ -457,5 +457,8 @@ spec:
             - "How do I write a policy to allow only specific DNS queries?"
             - "What's the syntax for creating a Cilium egress policy?"
     deployment:
+      env:
+        - name: KAGENT_CONTEXT_CONFIG
+          value: '{"compression":{"enabled":true,"compactionInterval":5,"overlapSize":1}}'
       resources:
         {{- toYaml .Values.resources | nindent 8 }}

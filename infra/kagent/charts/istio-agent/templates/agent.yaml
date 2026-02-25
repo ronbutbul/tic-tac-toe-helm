@@ -257,5 +257,8 @@ spec:
             - "query_documentation for best practices on Istio performance tuning."
             - "Describe the Istio ingress gateway pods in 'istio-system' namespace."
     deployment:
+      env:
+        - name: KAGENT_CONTEXT_CONFIG
+          value: '{"compression":{"enabled":true,"compactionInterval":5,"overlapSize":1}}'
       resources:
         {{- toYaml .Values.resources | nindent 8 }}

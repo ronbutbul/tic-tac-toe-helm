@@ -2196,6 +2196,34 @@ spec:
                 items:
                   type: string
                 type: array
+              context:
+                description: Context management configuration for token optimization.
+                properties:
+                  cache:
+                    properties:
+                      cacheIntervals:
+                        type: integer
+                      enabled:
+                        type: boolean
+                      minTokens:
+                        type: integer
+                      ttlSeconds:
+                        type: integer
+                    required:
+                    - enabled
+                    type: object
+                  compression:
+                    properties:
+                      compactionInterval:
+                        type: integer
+                      enabled:
+                        type: boolean
+                      overlapSize:
+                        type: integer
+                    required:
+                    - enabled
+                    type: object
+                type: object
               modelConfig:
                 description: Can either be a reference to the name of a ModelConfig
                   in the same namespace as the referencing Agent, or a reference to
@@ -9682,6 +9710,34 @@ spec:
                       Code will be executed in a sandboxed environment.
                       due to a bug in adk (https://github.com/google/adk-python/issues/3921), this field is ignored for now.
                     type: boolean
+                  context:
+                    description: Context management configuration for token optimization.
+                    properties:
+                      cache:
+                        properties:
+                          cacheIntervals:
+                            type: integer
+                          enabled:
+                            type: boolean
+                          minTokens:
+                            type: integer
+                          ttlSeconds:
+                            type: integer
+                        required:
+                        - enabled
+                        type: object
+                      compression:
+                        properties:
+                          compactionInterval:
+                            type: integer
+                          enabled:
+                            type: boolean
+                          overlapSize:
+                            type: integer
+                        required:
+                        - enabled
+                        type: object
+                    type: object
                   modelConfig:
                     description: |-
                       The name of the model config to use.

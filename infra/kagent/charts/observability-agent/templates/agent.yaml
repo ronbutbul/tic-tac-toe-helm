@@ -184,5 +184,8 @@ spec:
             - "Show me Kubernetes events related to the 'database' StatefulSet along with its key performance metrics."
             - "Help me identify potential performance bottlenecks in my microservices deployment."
     deployment:
+      env:
+        - name: KAGENT_CONTEXT_CONFIG
+          value: '{"compression":{"enabled":true,"compactionInterval":5,"overlapSize":1}}'
       resources:
         {{- toYaml .Values.resources | nindent 8 }}

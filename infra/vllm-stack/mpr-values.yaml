@@ -21,8 +21,9 @@ servingEngineSpec:
       storageClass: efs-sc-vllm
       pvcStorage: "200Gi"
       pvcAccessMode: ["ReadWriteMany"]
-
-      # OFFLINE MODE (this is enough)
+      lmcacheConfig: 
+        enabled: true
+        cpuOffloadingBufferSize: "20"
       env:
         - name: HF_HUB_OFFLINE
           value: "1"

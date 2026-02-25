@@ -21,9 +21,9 @@ servingEngineSpec:
       storageClass: efs-sc-vllm
       pvcStorage: "200Gi"
       pvcAccessMode: ["ReadWriteMany"]
-      lmcacheConfig: 
-        enabled: true
-        cpuOffloadingBufferSize: "10"
+      # lmcacheConfig: 
+      #   enabled: true
+      #   cpuOffloadingBufferSize: "10"
       env:
         - name: HF_HUB_OFFLINE
           value: "1"
@@ -44,8 +44,8 @@ servingEngineSpec:
         - name: TIKTOKEN_ENCODINGS_BASE
           value: "/data/gpt-oss-20b/tiktoken_encodings"
       vllmConfig:
-        enableChunkedPrefill: false
-        enablePrefixCaching: false
+        # enableChunkedPrefill: false
+        # enablePrefixCaching: false
         maxModelLen: 40192
         dtype: "auto"
         extraArgs:

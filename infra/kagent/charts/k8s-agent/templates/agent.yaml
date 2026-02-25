@@ -122,7 +122,7 @@ spec:
     context:
       compression:
         enabled: true
-        compactionInterval: 5
+        compactionInterval: 2
         overlapSize: 1
       cache:
         enabled: true

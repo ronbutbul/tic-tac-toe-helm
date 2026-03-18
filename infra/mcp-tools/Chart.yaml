@@ -1,19 +1,5 @@
 apiVersion: v2
-description: Standalone Helm chart for MCP tools (Elasticsearch, MongoDB, Kafka) with their agents
+description: Standalone Helm chart for MCP tools and their agents (data-driven, no subcharts)
 name: mcp-tools
 type: application
 version: 0.1.0
-
-dependencies:
-- condition: elasticsearch-mcp.enabled
-  name: elasticsearch-mcp
-  repository: ""
-  version: 0.7.8
-- condition: mongodb-mcp.enabled
-  name: mongodb-mcp
-  repository: ""
-  version: 0.7.8
-- condition: kafka-mcp.enabled
-  name: kafka-mcp
-  repository: ""
-  version: 0.7.8

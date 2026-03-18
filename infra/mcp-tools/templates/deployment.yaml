@@ -1,0 +1,91 @@
+{{- range $key, $mcp := .Values.mcps }}
+{{- if $mcp.enabled }}
+{{- $resourceName := include "mcp-tools.resourceName" (dict "releaseName" $.Release.Name "mcpKey" $key) }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $resourceName }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "mcp-tools.mcpLabels" (dict "chartName" $.Chart.Name "chartVersion" $.Chart.Version "mcpKey" $key "releaseName" $.Release.Name "releaseService" $.Release.Service) | nindent 4 }}
+spec:
+  replicas: {{ default 1 $mcp.replicas }}
+  selector:
+    matchLabels:
+      {{- include "mcp-tools.mcpSelectorLabels" (dict "mcpKey" $key "releaseName" $.Release.Name) | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/configmap: {{ include "mcp-tools.configmapChecksum" (dict "mcp" $mcp) }}
+      labels:
+        {{- include "mcp-tools.mcpSelectorLabels" (dict "mcpKey" $key "releaseName" $.Release.Name) | nindent 8 }}
+    spec:
+      serviceAccountName: {{ $resourceName }}
+      {{- with $mcp.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $mcp.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ $key }}
+          {{- with $mcp.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ $mcp.image.registry }}/{{ $mcp.image.repository }}:{{ $mcp.image.tag }}"
+          imagePullPolicy: {{ default "IfNotPresent" $mcp.image.pullPolicy }}
+          {{- with $mcp.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $mcp.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $mcp.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $mcp.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ $resourceName }}
+            {{- if $mcp.secretData }}
+            - secretRef:
+                name: {{ $resourceName }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ $mcp.service.port }}
+              protocol: TCP
+          {{- if (default true (dig "healthCheck" "enabled" true $mcp)) }}
+          readinessProbe:
+            httpGet:
+              path: {{ default "/health" (dig "healthCheck" "path" "/health" $mcp) }}
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: {{ default "/health" (dig "healthCheck" "path" "/health" $mcp) }}
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          {{- end }}
+      {{- with $mcp.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
+{{- end }}

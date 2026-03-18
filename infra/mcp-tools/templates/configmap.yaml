@@ -1,0 +1,21 @@
+{{- range $key, $mcp := .Values.mcps }}
+{{- if $mcp.enabled }}
+{{- $resourceName := include "mcp-tools.resourceName" (dict "releaseName" $.Release.Name "mcpKey" $key) }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $resourceName }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "mcp-tools.mcpLabels" (dict "chartName" $.Chart.Name "chartVersion" $.Chart.Version "mcpKey" $key "releaseName" $.Release.Name "releaseService" $.Release.Service) | nindent 4 }}
+data:
+  {{- range $envKey, $envVal := $mcp.env }}
+  {{ $envKey }}: {{ $envVal | quote }}
+  {{- end }}
+  DO_NOT_TRACK: "1"
+  {{- range $cfgKey, $cfgVal := (default dict $mcp.extraConfig) }}
+  {{ $cfgKey }}: {{ $cfgVal | quote }}
+  {{- end }}
+{{- end }}
+{{- end }}

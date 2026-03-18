@@ -1,5 +1,0 @@
-apiVersion: v2
-name: kafka-mcp
-description: MCP server for kafka
-type: application
-version: ${VERSION}

@@ -1,0 +1,22 @@
+{{- range $key, $mcp := .Values.mcps }}
+{{- if $mcp.enabled }}
+{{- $resourceName := include "mcp-tools.resourceName" (dict "releaseName" $.Release.Name "mcpKey" $key) }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $resourceName }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "mcp-tools.mcpLabels" (dict "chartName" $.Chart.Name "chartVersion" $.Chart.Version "mcpKey" $key "releaseName" $.Release.Name "releaseService" $.Release.Service) | nindent 4 }}
+spec:
+  type: {{ default "ClusterIP" $mcp.service.type }}
+  ports:
+    - port: {{ $mcp.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "mcp-tools.mcpSelectorLabels" (dict "mcpKey" $key "releaseName" $.Release.Name) | nindent 4 }}
+{{- end }}
+{{- end }}

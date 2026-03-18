@@ -14,49 +14,34 @@ Create a default fully qualified app name.
 {{- end }}
 
 {{/*
-Common labels
+Resource name for an MCP: <release>-<mcpKey>
 */}}
-{{- define "mcp-tools.labels" -}}
-helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
-{{ include "mcp-tools.selectorLabels" . }}
-{{- if .Chart.Version }}
-app.kubernetes.io/version: {{ .Chart.Version | quote }}
-{{- end }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- define "mcp-tools.resourceName" -}}
+{{- printf "%s-%s" .releaseName .mcpKey | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
-Selector labels
+Common labels for an MCP resource
 */}}
-{{- define "mcp-tools.selectorLabels" -}}
-app.kubernetes.io/name: {{ default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
-app.kubernetes.io/instance: {{ .Release.Name }}
+{{- define "mcp-tools.mcpLabels" -}}
+helm.sh/chart: {{ printf "%s-%s" .chartName .chartVersion | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+app.kubernetes.io/name: {{ .mcpKey }}
+app.kubernetes.io/instance: {{ .releaseName }}
+app.kubernetes.io/managed-by: {{ .releaseService }}
+app.kubernetes.io/component: {{ .mcpKey }}
 {{- end }}
 
 {{/*
-Compute the RemoteMCPServer name for each subchart.
-These match the fullname produced by each subchart's _helpers.tpl.
+Selector labels for an MCP resource
 */}}
-{{- define "mcp-tools.elasticsearch-mcp.remoteName" -}}
-{{- if (index .Values "elasticsearch-mcp" "fullnameOverride") }}
-{{- index .Values "elasticsearch-mcp" "fullnameOverride" | trunc 63 | trimSuffix "-" }}
-{{- else }}
-{{- printf "%s-elasticsearch-mcp" .Release.Name | trunc 63 | trimSuffix "-" }}
-{{- end }}
+{{- define "mcp-tools.mcpSelectorLabels" -}}
+app.kubernetes.io/name: {{ .mcpKey }}
+app.kubernetes.io/instance: {{ .releaseName }}
 {{- end }}
 
-{{- define "mcp-tools.mongodb-mcp.remoteName" -}}
-{{- if (index .Values "mongodb-mcp" "fullnameOverride") }}
-{{- index .Values "mongodb-mcp" "fullnameOverride" | trunc 63 | trimSuffix "-" }}
-{{- else }}
-{{- printf "%s-mongodb-mcp" .Release.Name | trunc 63 | trimSuffix "-" }}
-{{- end }}
-{{- end }}
-
-{{- define "mcp-tools.kafka-mcp.remoteName" -}}
-{{- if (index .Values "kafka-mcp" "fullnameOverride") }}
-{{- index .Values "kafka-mcp" "fullnameOverride" | trunc 63 | trimSuffix "-" }}
-{{- else }}
-{{- printf "%s-kafka-mcp" .Release.Name | trunc 63 | trimSuffix "-" }}
-{{- end }}
+{{/*
+Configmap checksum for rollout on config change
+*/}}
+{{- define "mcp-tools.configmapChecksum" -}}
+{{- toYaml .mcp.env | sha256sum }}
 {{- end }}

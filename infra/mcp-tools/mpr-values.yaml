@@ -1,13 +1,17 @@
-elasticsearch-mcp:
-  elasticsearch:
-    url: "http://elastic-kibana-elasticsearch:9200"
+mcps:
+  elasticsearch-mcp:
+    env:
+      ES_MCP_CONNECTION_STRING: "http://elastic-kibana-elasticsearch:9200"
 
-mongodb-mcp:
-  mongodb:
-    url: "mongodb://mongo8-primary:27017"
+  mongodb-mcp:
+    env:
+      MDB_MCP_CONNECTION_STRING: "mongodb://mongo8-primary:27017"
+      MCP_HOST: "0.0.0.0"
+      MCP_PORT: "8000"
 
-kafka-mcp:
-  kafka:
-    url: "bitnami-kafka:9092"
-  kafkaadmin:
-    url: "bitnami-kafka-controller-headless:9093"
+  kafka-mcp:
+    env:
+      KAFKA_BOOTSTRAP_SERVERS: "bitnami-kafka:9092"
+      KAFKA_ADMIN_SERVERS: "bitnami-kafka-controller-headless:9093"
+      MCP_HOST: "0.0.0.0"
+      MCP_PORT: "8000"

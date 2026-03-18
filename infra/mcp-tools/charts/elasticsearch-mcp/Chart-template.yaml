@@ -1,5 +1,0 @@
-apiVersion: v2
-name: elasticsearch-mcp
-description: MCP server for elasticsearch
-type: application
-version: ${VERSION}

@@ -1,0 +1,5 @@
+apiVersion: v2
+name: mongodb-mcp
+description: MCP server for mongodb
+type: application
+version: ${VERSION}

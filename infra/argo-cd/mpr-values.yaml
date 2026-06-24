@@ -7,8 +7,14 @@ global:
 
 configs:
   cm:
+    accounts.gitopsdoctor: apiKey
     create: true
     exec.enabled: true
+  rbac:
+    create: true
+    policy.default: ""                 # leave empty = deny by default (good)
+    policy.csv: |                      # <-- was "", replace with this block
+      g, gitopsdoctor, role:readonly
 
   params:
     create: true

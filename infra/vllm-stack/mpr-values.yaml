@@ -11,7 +11,7 @@ servingEngineSpec:
       # tag: "v0.14.1"          # PIN — no latest
       # imagePullPolicy: "Always" 
       repository: "lmcache/vllm-openai"
-      tag: "latest-nightly"
+      tag: "v0.5.0"
       # Passed positionally to: vllm serve <modelURL>
       modelURL: "/data/gpt-oss-20b"
       replicaCount: 1

@@ -11,7 +11,7 @@ servingEngineSpec:
       # tag: "v0.14.1"          # PIN — no latest
       # imagePullPolicy: "Always" 
       repository: "lmcache/vllm-openai"
-      tag: "v0.5.0"
+      tag: "nightly-2026-02-20"
       # Passed positionally to: vllm serve <modelURL>
       modelURL: "/data/gpt-oss-20b"
       replicaCount: 1
@@ -63,7 +63,7 @@ servingEngineSpec:
       hf_token: ""
       initContainer:
         name: "wait-for-cache-server"
-        image: lmcache/vllm-openai:v0.5.0
+        image: lmcache/vllm-openai:nightly-2026-02-20
         command: ["/bin/sh", "-c"]
         args:
           - |
@@ -89,7 +89,7 @@ cacheserverSpec:
 
   # -- Cache server image (reusing the vllm image)
   repository: "lmcache/vllm-openai"
-  tag: "v0.5.0"
+  tag: "nightly-2026-02-26"
 
   # TODO (Jiayi): please adjust this once we have evictor
   # -- router resource requests and limits

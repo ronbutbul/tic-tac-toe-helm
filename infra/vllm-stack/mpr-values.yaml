@@ -63,7 +63,7 @@ servingEngineSpec:
       hf_token: ""
       initContainer:
         name: "wait-for-cache-server"
-        image: lmcache/vllm-openai:latest-nightly
+        image: lmcache/vllm-openai:v0.5.0
         command: ["/bin/sh", "-c"]
         args:
           - |

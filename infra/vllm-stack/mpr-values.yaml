@@ -89,7 +89,7 @@ cacheserverSpec:
 
   # -- Cache server image (reusing the vllm image)
   repository: "lmcache/vllm-openai"
-  tag: "latest-nightly"
+  tag: "v0.5.0"
 
   # TODO (Jiayi): please adjust this once we have evictor
   # -- router resource requests and limits

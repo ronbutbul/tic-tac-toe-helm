@@ -2,7 +2,7 @@
 set -euo pipefail
 
 KUBECTL="kubectl"
-REQUIRED_CTX="tic-automode"
+REQUIRED_CTX="arn:aws:eks:il-central-1:941284018955:cluster/tic-automode"
 ARGO_NS="argo-cd"
 
 echo "[INFO] Switching kubectl context to '${REQUIRED_CTX}'"

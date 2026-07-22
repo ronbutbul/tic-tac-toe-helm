@@ -37,7 +37,13 @@ server:
     - --rootpath=/argo-cd
     - --insecure
     - --enable-gzip
-
+  resources: 
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 1000m
+      memory: 1Gi
   service:
     type: NodePort
     nodePortHttp: 30080
@@ -52,10 +58,27 @@ server:
       - hosts:
         - "infra.testmpr.aws2.rafael.co.il"
         secretName: testmpr-aws-wildcard-cert
-repoServer:
-  readinessProbe:
-    failureThreshold: 6
-    timeoutSeconds: 5
-  livenessProbe:
-    failureThreshold: 6
-    timeoutSeconds: 5
+reposerver:
+  resources: 
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 1000m
+      memory: 1Gi
+controller:
+  resources: 
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 1000m
+      memory: 1Gi
+applicationset:
+  resources: 
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 1000m
+      memory: 1Gi      

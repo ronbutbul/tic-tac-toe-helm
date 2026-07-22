@@ -44,13 +44,13 @@ controller:
   automountServiceAccountToken: true
   # heapOpts: -Xmx4048m -Xms4048m
   heapOpts: -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=50
-  # resources:
-  #   requests:
-  #     memory: "8096Mi"
-  #     cpu: 4
-  #   limits:
-  #     memory: "8096Mi"
-  #     cpu: 4
+  resources:
+    requests:
+      memory: "4Gi"
+      cpu: 2
+    limits:
+      memory: "4Gi"
+      cpu: 2
   resourcesPreset: "large"
   persistence:
     enabled: true

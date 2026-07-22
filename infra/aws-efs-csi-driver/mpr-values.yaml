@@ -33,3 +33,10 @@ controller:
     name: efs-csi-controller-sa
     annotations:
       eks.amazonaws.com/role-arn: arn:aws:iam::941284018955:role/efscontroller
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 1000m
+      memory: 1Gi

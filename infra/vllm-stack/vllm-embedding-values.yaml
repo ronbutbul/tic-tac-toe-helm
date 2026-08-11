@@ -8,8 +8,8 @@ servingEngineSpec:
   modelSpec:
     - name: "embedding"
 
-      repository: "lmcache/vllm-openai"
-      tag: "nightly-2026-02-20"
+      repository: "vllm/vllm-openai"
+      tag: "v0.14.1"
 
       # You need to put this model on the PVC,
       # the same way you currently have /data/gpt-oss-20b.

@@ -1,0 +1,85 @@
+servingEngineSpec:
+  runtimeClassName: "nvidia"
+
+  tolerations:
+    - key: "nvidia.com/gpu"
+      operator: "Equal"
+
+  modelSpec:
+    - name: "embedding"
+
+      repository: "lmcache/vllm-openai"
+      tag: "nightly-2026-02-20"
+
+      # You need to put this model on the PVC,
+      # the same way you currently have /data/gpt-oss-20b.
+      modelURL: "/data/bge-base-en-v1.5"
+
+      replicaCount: 1
+
+      requestCPU: 4
+      requestMemory: "8Gi"
+      requestGPU: 1
+
+      storageClass: efs-sc-vllm
+      pvcStorage: "20Gi"
+      pvcAccessMode:
+        - ReadWriteMany
+
+      env:
+        - name: HF_HUB_OFFLINE
+          value: "1"
+
+        - name: TRANSFORMERS_OFFLINE
+          value: "1"
+
+        - name: HF_DATASETS_OFFLINE
+          value: "1"
+
+        - name: HF_HUB_DISABLE_TELEMETRY
+          value: "1"
+
+        - name: HF_TOKEN
+          value: ""
+
+        - name: HF_HOME
+          value: "/data/.cache"
+
+        - name: VLLM_LOGGING_LEVEL
+          value: "INFO"
+
+
+      vllmConfig:
+
+        # Explicitly tell vLLM that this instance is a pooling server.
+        runner: "pooling"
+
+        # BGE base supports 512-token input.
+        maxModelLen: 512
+
+        dtype: "auto"
+
+        # Prefix caching is useful for generation.
+        # We do not need it here.
+        enablePrefixCaching: false
+
+        extraArgs:
+          - "--served-model-name"
+          - "bge-base-en-v1.5"
+
+
+      # No LMCache for embedding server.
+      lmcacheConfig:
+        enabled: false
+
+      hf_token: ""
+
+
+# No LMCache server for this release.
+cacheserverSpec:
+  enabled: false
+
+
+# One embedding replica → don't need the router.
+routerSpec:
+  enableRouter: false

@@ -76,8 +76,8 @@ servingEngineSpec:
 
 
 # No LMCache server for this release.
-cacheserverSpec:
-  enabled: false
+# cacheserverSpec:
+#   enabled: false
 
 
 # One embedding replica → don't need the router.

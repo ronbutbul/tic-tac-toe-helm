@@ -63,9 +63,9 @@ servingEngineSpec:
         # We do not need it here.
         enablePrefixCaching: false
 
-        # extraArgs:
-        #   - "--served-model-name"
-        #   - "bge-base-en-v1.5"
+        extraArgs:
+          - "--hf-overrides"
+          - '{"matryoshka_dimensions":[768]}'
 
 
       # No LMCache for embedding server.

@@ -113,7 +113,7 @@ spec:
       - mcpServer:
           apiGroup: kagent.dev
           kind: RemoteMCPServer
-          name: mcp-tools-elasticsearch-mcp
+          name: kagent-tools-elasticsearch-mcp
           toolNames:
             - list-indices
             - list-datastreams

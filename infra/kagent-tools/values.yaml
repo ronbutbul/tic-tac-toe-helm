@@ -63,51 +63,6 @@ mcps:
   # ============================================================================
   trail-mcp:
     enabled: false
-    replicas: 1
-
-    image:
-      registry: artifactory.rafael.co.il:6001/flight
-      repository: flight-mcp-simulator
-      pullPolicy: IfNotPresent
-      tag: "0.3.0"
-
-    service:
-      type: ClusterIP
-      port: 7001
-
-    env:
-      FLIGHT_DRONE_MANAGER_URL: "https://common-drone-manager-rafael-tsgs-cicd-flight.apps.ocp-tsgs.aws2.rafael.co.il"
-      FLIGHT_INFRA_MANAGER_URL: "https://flight-infra-manager-rafael-tsgs-cicd-flight.apps.ocp-tsgs.aws2.rafael.co.il"
-      MISSION_HYDRA_SIM_BE_URL: "https://mission-hydra-sim-be-rafael-tsgs-cicd-mission.apps.ocp-tsgs.aws2.rafael.co.il"
-      MISSION_INVESTIGATOR_SIM_BE_URL: "https://mission-investigator-sim-be-rafael-tsgs-cicd-mission.apps.ocp-tsgs.aws2.rafael.co.il"
-      KLV_SIM_URL: "https://common-klv-sim-rafael-tsgs-cicd-mission.apps.ocp-tsgs.aws2.rafael.co.il"
-      HOST: "0.0.0.0"
-      PORT: "7001"
-      REQUEST_TIMEOUT_SECONDS: "10.0"
-      SIMULATION_INTERVAL_SECONDS: "1.0"
-      ENABLE_HYDRA_TOOLS: "true"
-      ENABLE_INVESTIGATOR_TOOLS: "true"
-      LEVEL: "INFO"
-      FORMAT: "json"
-
-    resources:
-      requests:
-        cpu: 100m
-        memory: 128Mi
-      limits:
-        cpu: 500m
-        memory: 512Mi
-
-    serviceAccount:
-      create: true
-      annotations: {}
-
-    securityContext: {}
-    tolerations: []
-    nodeSelector: {}
-    volumes: []
-    volumeMounts: []
-    extraConfig: {}
 
   # ============================================================================
   # KAFKA MCP

@@ -62,7 +62,7 @@ mcps:
   # trail MCP
   # ============================================================================
   trail-mcp:
-    enabled: true
+    enabled: false
     replicas: 1
 
     image:

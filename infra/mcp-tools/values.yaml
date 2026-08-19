@@ -5,6 +5,9 @@
 nameOverride: ""
 fullnameOverride: ""
 
+imagePullSecrets:
+  - name: tsinf-reg
+
 # ==============================================================================
 # MCP SERVERS
 # ==============================================================================
@@ -19,10 +22,10 @@ mcps:
     replicas: 1
 
     image:
-      registry: ronbutbul135
-      repository: elasticsearch-mcp-service
-      pullPolicy: Always
-      tag: "20260212-172526-36c9253b"
+      registry: artifactory.rafael.co.il:6001
+      repository: infra/elasticsearch-mcp-service
+      pullPolicy: IfNotPresent
+      tag: "20260224-105241-7f40c5fd"
 
     service:
       type: ClusterIP
@@ -56,26 +59,36 @@ mcps:
     extraConfig: {}
 
   # ============================================================================
-  # MONGODB MCP
+  # trail MCP
   # ============================================================================
-  mongodb-mcp:
+  trail-mcp:
     enabled: true
     replicas: 1
 
     image:
-      registry: 941284018955.dkr.ecr.il-central-1.amazonaws.com
-      repository: mongodb-mcp-service
-      pullPolicy: Always
-      tag: "20260202-131744-c6772109"
+      registry: artifactory.rafael.co.il:6001/flight
+      repository: flight-mcp-simulator
+      pullPolicy: IfNotPresent
+      tag: "0.3.0"
 
     service:
       type: ClusterIP
-      port: 8000
+      port: 7001
 
     env:
-      MDB_MCP_CONNECTION_STRING: "mongodb://localhost:27017"
-      MCP_HOST: "0.0.0.0"
-      MCP_PORT: "8000"
+      FLIGHT_DRONE_MANAGER_URL: "https://common-drone-manager-rafael-tsgs-cicd-flight.apps.ocp-tsgs.aws2.rafael.co.il"
+      FLIGHT_INFRA_MANAGER_URL: "https://flight-infra-manager-rafael-tsgs-cicd-flight.apps.ocp-tsgs.aws2.rafael.co.il"
+      MISSION_HYDRA_SIM_BE_URL: "https://mission-hydra-sim-be-rafael-tsgs-cicd-mission.apps.ocp-tsgs.aws2.rafael.co.il"
+      MISSION_INVESTIGATOR_SIM_BE_URL: "https://mission-investigator-sim-be-rafael-tsgs-cicd-mission.apps.ocp-tsgs.aws2.rafael.co.il"
+      KLV_SIM_URL: "https://common-klv-sim-rafael-tsgs-cicd-mission.apps.ocp-tsgs.aws2.rafael.co.il"
+      HOST: "0.0.0.0"
+      PORT: "7001"
+      REQUEST_TIMEOUT_SECONDS: "10.0"
+      SIMULATION_INTERVAL_SECONDS: "1.0"
+      ENABLE_HYDRA_TOOLS: "true"
+      ENABLE_INVESTIGATOR_TOOLS: "true"
+      LEVEL: "INFO"
+      FORMAT: "json"
 
     resources:
       requests:
@@ -138,6 +151,41 @@ mcps:
     volumeMounts: []
     extraConfig: {}
 
+  # ============================================================================
+  # MONGO MCP
+  # ============================================================================
+  mongo-mcp:
+    enabled: true
+    replicas: 1
+
+    image:
+      registry: 941284018955.dkr.ecr.il-central-1.amazonaws.com
+      repository: mongodb-mcp-service
+      pullPolicy: Always
+      tag: "20260202-131744-c6772109"
+
+    service:
+      type: ClusterIP
+      port: 8000
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+    serviceAccount:
+      create: true
+      annotations: {}
+
+    securityContext: {}
+    tolerations: []
+    nodeSelector: {}
+    volumes: []
+    volumeMounts: []
+    extraConfig: {}
 # ==============================================================================
 # AGENTS
 # ==============================================================================
@@ -146,9 +194,9 @@ agents:
   elasticsearch:
     enabled: true
     modelConfig: "vllm-gpt"
-  mongodb:
+  kafka:
     enabled: true
     modelConfig: "vllm-gpt"
-  kafka:
+  mongodb:
     enabled: true
     modelConfig: "vllm-gpt"

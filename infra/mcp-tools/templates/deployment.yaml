@@ -21,6 +21,10 @@ spec:
       labels:
         {{- include "mcp-tools.mcpSelectorLabels" (dict "mcpKey" $key "releaseName" $.Release.Name) | nindent 8 }}
     spec:
+      {{- with $.Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       serviceAccountName: {{ $resourceName }}
       {{- with $mcp.nodeSelector }}
       nodeSelector:
@@ -50,10 +54,24 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with $mcp.volumeMounts }}
+
           volumeMounts:
+            {{- with $mcp.volumeMounts }}
             {{- toYaml . | nindent 12 }}
-          {{- end }}
+            {{- end }}
+            - name: trusted-ca
+              mountPath: /etc/ssl/certs/extra-certificates.crt
+              subPath: extra-certificates.crt
+              readOnly: true
+
+          env:
+            - name: REQUESTS_CA_BUNDLE
+              value: /etc/ssl/certs/extra-certificates.crt
+            - name: SSL_CERT_FILE
+              value: /etc/ssl/certs/extra-certificates.crt
+            - name: CURL_CA_BUNDLE
+              value: /etc/ssl/certs/extra-certificates.crt
+
           envFrom:
             - configMapRef:
                 name: {{ $resourceName }}
@@ -61,31 +79,40 @@ spec:
             - secretRef:
                 name: {{ $resourceName }}
             {{- end }}
+
           ports:
             - name: http
               containerPort: {{ $mcp.service.port }}
               protocol: TCP
-          {{- if (default true (dig "healthCheck" "enabled" true $mcp)) }}
-          readinessProbe:
-            httpGet:
-              path: {{ default "/health" (dig "healthCheck" "path" "/health" $mcp) }}
-              port: http
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 3
-          livenessProbe:
-            httpGet:
-              path: {{ default "/health" (dig "healthCheck" "path" "/health" $mcp) }}
-              port: http
-            initialDelaySeconds: 30
-            periodSeconds: 30
-            timeoutSeconds: 5
-            failureThreshold: 3
-          {{- end }}
-      {{- with $mcp.volumes }}
+
+          # {{- if (default true (dig "healthCheck" "enabled" true $mcp)) }}
+          # readinessProbe:
+          #   httpGet:
+          #     path: {{ default "/health" (dig "healthCheck" "path" "/health" $mcp) }}
+          #     port: http
+          #   initialDelaySeconds: 10
+          #   periodSeconds: 10
+          #   timeoutSeconds: 5
+          #   failureThreshold: 3
+          # livenessProbe:
+          #   httpGet:
+          #     path: {{ default "/health" (dig "healthCheck" "path" "/health" $mcp) }}
+          #     port: http
+          #   initialDelaySeconds: 30
+          #   periodSeconds: 30
+          #   timeoutSeconds: 5
+          #   failureThreshold: 3
+          # {{- end }}
+
       volumes:
+        {{- with $mcp.volumes }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- end }}
+        - name: trusted-ca
+          configMap:
+            name: trusted-ca
+            items:
+              - key: ca-bundle.crt
+                path: extra-certificates.crt
 {{- end }}
 {{- end }}

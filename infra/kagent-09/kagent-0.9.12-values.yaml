@@ -1,0 +1,72 @@
+# Keep the first upgrade/test simple.
+registry: "941284018955.dkr.ecr.il-central-1.amazonaws.com"
+tag: "0.9.12"
+ui:
+  image:
+    registry: "941284018955.dkr.ecr.il-central-1.amazonaws.com"
+
+database:
+  postgres:
+    vectorEnabled: true
+
+    bundled:
+      enabled: true
+      storage: "5Gi"
+      storageClassName: "auto-ebs-gp3"
+      image:
+        registry: docker.io
+        repository: pgvector
+        name: pgvector
+        tag: "0.8.6-pg18-trixie"
+        pullPolicy: IfNotPresent
+
+
+k8s-agent:
+  enabled: true
+  modelConfigRef: "vllm-gpt"
+  memory:
+    enabled: true
+    modelConfigRef: "vllm-emb"
+    ttlDays: 30
+  compaction:
+    compactionInterval: 5
+    tokenThreshold: 25000
+    overlapSize: 2
+    eventRetentionSize: 10
+    summarizer:
+      modelConfig: vllm-gpt    
+# Only the Kubernetes agent for this first validation.
+
+cilium-policy-agent:
+  enabled: false
+
+cilium-manager-agent:
+  enabled: false
+
+cilium-debug-agent:
+  enabled: false
+
+helm-agent:
+  enabled: false
+
+istio-agent:
+  enabled: false
+
+kgateway-agent:
+  enabled: false
+
+observability-agent:
+  enabled: false
+
+promql-agent:
+  enabled: false
+
+argo-rollouts-agent:
+  enabled: false
+
+tools:
+  grafana-mcp:
+    enabled: false
+
+  querydoc:
+    enabled: false

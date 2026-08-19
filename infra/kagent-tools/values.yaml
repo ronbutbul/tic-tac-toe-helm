@@ -22,10 +22,10 @@ mcps:
     replicas: 1
 
     image:
-      registry: artifactory.rafael.co.il:6001
-      repository: infra/elasticsearch-mcp-service
+      registry: ronbutbul135
+      repository: elasticsearch-mcp-service
       pullPolicy: IfNotPresent
-      tag: "20260224-105241-7f40c5fd"
+      tag: "20260212-172526-36c9253b"
 
     service:
       type: ClusterIP

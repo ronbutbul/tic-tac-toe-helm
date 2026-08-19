@@ -59,18 +59,18 @@ spec:
             {{- with $mcp.volumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-            - name: trusted-ca
-              mountPath: /etc/ssl/certs/extra-certificates.crt
-              subPath: extra-certificates.crt
-              readOnly: true
+            # - name: trusted-ca
+            #   mountPath: /etc/ssl/certs/extra-certificates.crt
+            #   subPath: extra-certificates.crt
+            #   readOnly: true
 
-          env:
-            - name: REQUESTS_CA_BUNDLE
-              value: /etc/ssl/certs/extra-certificates.crt
-            - name: SSL_CERT_FILE
-              value: /etc/ssl/certs/extra-certificates.crt
-            - name: CURL_CA_BUNDLE
-              value: /etc/ssl/certs/extra-certificates.crt
+          # env:
+          #   - name: REQUESTS_CA_BUNDLE
+          #     value: /etc/ssl/certs/extra-certificates.crt
+          #   - name: SSL_CERT_FILE
+          #     value: /etc/ssl/certs/extra-certificates.crt
+          #   - name: CURL_CA_BUNDLE
+          #     value: /etc/ssl/certs/extra-certificates.crt
 
           envFrom:
             - configMapRef:
@@ -108,11 +108,11 @@ spec:
         {{- with $mcp.volumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-        - name: trusted-ca
-          configMap:
-            name: trusted-ca
-            items:
-              - key: ca-bundle.crt
-                path: extra-certificates.crt
+        # - name: trusted-ca
+        #   configMap:
+        #     name: trusted-ca
+        #     items:
+        #       - key: ca-bundle.crt
+        #         path: extra-certificates.crt
 {{- end }}
 {{- end }}

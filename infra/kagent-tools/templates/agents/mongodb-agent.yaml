@@ -58,7 +58,7 @@ spec:
       mcpServer:
         apiGroup: kagent.dev
         kind: RemoteMCPServer
-        name: {{ $mcpName }}
+        name: kagent-tools-mongo-mcp
         toolNames:
         - list-databases
         - list-collections

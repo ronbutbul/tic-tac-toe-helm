@@ -5,6 +5,20 @@ servingEngineSpec:
     - key: "nvidia.com/gpu"
       operator: "Equal"
 
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: NodeGroupType
+                operator: In
+                values:
+                  - gpu-node-pool-emb
+              - key: type
+                operator: In
+                values:
+                  - karpenter
+                  
   modelSpec:
     - name: "embedding"
 

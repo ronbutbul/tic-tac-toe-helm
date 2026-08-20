@@ -7,7 +7,6 @@
 {{- $mcpName := include "mcp-tools.resourceName" (dict "releaseName" .Release.Name "mcpKey" $mcpKey) }}
 {{- $toolNames := dig "toolNames" (list
       "list-indices"
-      "list-datastreams"
       "search"
       "count"
       "get-document"

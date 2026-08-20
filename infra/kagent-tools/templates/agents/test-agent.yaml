@@ -1,20 +1,11 @@
-{{- $agentKey := "elasticsearch" }}
-{{- $mcpKey := "elasticsearch-mcp" }}
+{{/*
+Standalone agent: no backing MCP and no tools, so unlike the other agent
+templates this one is gated on the agent flag alone.
+*/}}
+{{- $agentKey := "test" }}
 {{- $agent := dig $agentKey dict (default dict .Values.agents) }}
-{{- $mcp := dig $mcpKey dict (default dict .Values.mcps) }}
-{{- if and (dig "enabled" false $mcp) (dig "enabled" false $agent) }}
-{{- $agentName := dig "name" (printf "%s-agent" $agentKey) $agent }}
-{{- $mcpName := include "mcp-tools.resourceName" (dict "releaseName" .Release.Name "mcpKey" $mcpKey) }}
-{{- $toolNames := dig "toolNames" (list
-      "list-indices"
-      "search"
-      "count"
-      "get-document"
-      "index-mappings"
-      "index-stats"
-      "cluster-health"
-      "cluster-stats"
-      "switch-connection") $agent }}
+{{- if dig "enabled" false $agent }}
+{{- $agentName := dig "name" $agentKey $agent }}
 apiVersion: kagent.dev/v1alpha2
 kind: Agent
 metadata:
@@ -27,7 +18,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  description: {{ dig "description" "Elasticsearch / Kubernetes logs assistant for analyzing info, debug, and error logs and troubleshooting crashes (via MCP)" $agent | quote }}
+  description: {{ dig "description" "General-purpose kagent assistant" $agent | quote }}
   type: Declarative
   declarative:
     modelConfig: {{ $agent.modelConfigRef | default $agent.modelConfig | default "vllm-gpt" }}
@@ -37,14 +28,6 @@ spec:
     stream: {{ dig "stream" true $agent }}
     systemMessage: |-
       {{- include "mcp-tools.agentSystemMessage" (dict "root" $ "agentKey" $agentKey "indent" 6) }}
-    tools:
-      - type: McpServer
-        mcpServer:
-          apiGroup: kagent.dev
-          kind: RemoteMCPServer
-          name: {{ $mcpName }}
-          toolNames:
-            {{- toYaml $toolNames | nindent 12 }}
     {{- with (include "mcp-tools.agentMemory" (dict "agent" $agent "agentKey" $agentKey)) }}
     {{- . | nindent 4 }}
     {{- end }}

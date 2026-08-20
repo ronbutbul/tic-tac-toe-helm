@@ -359,3 +359,25 @@ agents:
     deployment:
       labels:
         app.kubernetes.io/instance: agent
+
+  # Standalone assistant -- no MCP and no tools, so it is not gated on an MCP.
+  # Named "test" rather than "test-agent" to match the resource already in the
+  # cluster; prompt lives in agents-rules/test.md.
+  test:
+    enabled: true
+    name: test
+    description: "ema shelha begeces"
+    modelConfigRef: "vllm-gpt"
+    runtime: python
+    stream: true
+    memory:
+      enabled: false
+      modelConfigRef: "vllm-emb"
+      ttlDays: 15
+    # compaction:
+    #   compactionInterval: 5
+    #   tokenThreshold: 25000
+    #   overlapSize: 2
+    #   eventRetentionSize: 10
+    #   summarizer:
+    #     modelConfig: vllm-gpt

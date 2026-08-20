@@ -31,8 +31,11 @@ spec:
   type: Declarative
   declarative:
     modelConfig: {{ $agent.modelConfigRef | default $agent.modelConfig | default "vllm-gpt" }}
+    {{- with $agent.runtime }}
+    runtime: {{ . }}
+    {{- end }}
     stream: {{ dig "stream" true $agent }}
-    systemMessage: |
+    systemMessage: |-
       {{- include "mcp-tools.agentSystemMessage" (dict "root" $ "agentKey" $agentKey "indent" 6) }}
     tools:
       - type: McpServer

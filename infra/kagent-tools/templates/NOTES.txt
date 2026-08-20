@@ -16,7 +16,8 @@ MCP servers:
 
 Agents:
 {{- range $key, $agent := .Values.agents }}
-{{- if and $agent.enabled (dig (printf "%s-mcp" $key) "enabled" false (default dict $.Values.mcps)) }}
+{{- $mcpForAgent := dig (printf "%s-mcp" $key) dict (default dict $.Values.mcps) }}
+{{- if and $agent.enabled (or (not $mcpForAgent) (dig "enabled" false $mcpForAgent)) }}
   - {{ default (printf "%s-agent" $key) $agent.name }} (prompt: agents-rules/{{ $key }}.md, model: {{ $agent.modelConfigRef | default $agent.modelConfig | default "vllm-gpt" }})
 {{- end }}
 {{- end }}

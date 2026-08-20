@@ -1,0 +1,59 @@
+{{- range $key, $mc := .Values.modelConfigs }}
+{{- if $mc.enabled }}
+{{- $name := default $key $mc.name }}
+{{- $provider := required (printf "modelConfigs.%s.provider is required (e.g. OpenAI, Anthropic, AzureOpenAI, Ollama)" $key) $mc.provider }}
+---
+apiVersion: kagent.dev/v1alpha2
+kind: ModelConfig
+metadata:
+  name: {{ $name }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "mcp-tools.mcpLabels" (dict "chartName" $.Chart.Name "chartVersion" $.Chart.Version "mcpKey" $key "releaseName" $.Release.Name "releaseService" $.Release.Service) | nindent 4 }}
+  {{- with $mc.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  provider: {{ $provider }}
+  model: {{ required (printf "modelConfigs.%s.model is required" $key) $mc.model | quote }}
+  {{- with $mc.apiKeySecret }}
+  apiKeySecret: {{ . }}
+  {{- end }}
+  {{- with $mc.apiKeySecretKey }}
+  apiKeySecretKey: {{ . }}
+  {{- end }}
+  {{- with $mc.defaultHeaders }}
+  defaultHeaders:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- /*
+kagent nests provider options under a field named after the provider:
+OpenAI -> openAI, AzureOpenAI -> azureOpenAI, Anthropic -> anthropic, ...
+Override with modelConfigs.<key>.providerField when a provider does not follow
+that convention.
+*/}}
+  {{- with $mc.providerConfig }}
+  {{ default (untitle $provider) $mc.providerField }}:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $mc.extraSpec }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
+{{- if $mc.apiKeySecretData }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ required (printf "modelConfigs.%s.apiKeySecret is required when apiKeySecretData is set" $key) $mc.apiKeySecret }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "mcp-tools.mcpLabels" (dict "chartName" $.Chart.Name "chartVersion" $.Chart.Version "mcpKey" $key "releaseName" $.Release.Name "releaseService" $.Release.Service) | nindent 4 }}
+type: Opaque
+stringData:
+  {{- range $secretKey, $secretVal := $mc.apiKeySecretData }}
+  {{ $secretKey }}: {{ $secretVal | quote }}
+  {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,24 @@
+{{ .Chart.Name }} {{ .Chart.Version }} installed as "{{ .Release.Name }}" in namespace "{{ .Release.Namespace }}".
+
+Model configs:
+{{- range $key, $mc := .Values.modelConfigs }}
+{{- if $mc.enabled }}
+  - {{ default $key $mc.name }} ({{ $mc.provider }} / {{ $mc.model }})
+{{- end }}
+{{- end }}
+
+MCP servers:
+{{- range $key, $mcp := .Values.mcps }}
+{{- if $mcp.enabled }}
+  - {{ include "mcp-tools.resourceName" (dict "releaseName" $.Release.Name "mcpKey" $key) }} -> http://{{ include "mcp-tools.resourceName" (dict "releaseName" $.Release.Name "mcpKey" $key) }}.{{ $.Release.Namespace }}:{{ include "mcp-tools.mcpPort" (dict "mcp" $mcp) }}{{ default "/mcp" $mcp.path }}
+{{- end }}
+{{- end }}
+
+Agents:
+{{- range $key, $agent := .Values.agents }}
+{{- if and $agent.enabled (dig (printf "%s-mcp" $key) "enabled" false (default dict $.Values.mcps)) }}
+  - {{ default (printf "%s-agent" $key) $agent.name }} (prompt: agents-rules/{{ $key }}.md, model: {{ $agent.modelConfigRef | default $agent.modelConfig | default "vllm-gpt" }})
+{{- end }}
+{{- end }}
+
+Edit an agent's system prompt in agents-rules/<agent>.md, then re-run `helm upgrade`.

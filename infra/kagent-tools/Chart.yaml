@@ -1,5 +1,10 @@
 apiVersion: v2
-description: Standalone Helm chart for MCP tools and their agents (data-driven, no subcharts)
 name: mcp-tools
+description: Standalone Helm chart for MCP tools, their agents, and model configs (data-driven, no subcharts)
 type: application
-version: 0.1.0
+version: 0.2.0
+appVersion: "0.2.0"
+keywords:
+  - kagent
+  - mcp
+  - agents

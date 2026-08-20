@@ -1,6 +1,7 @@
 {{- range $key, $mcp := .Values.mcps }}
 {{- if $mcp.enabled }}
 {{- $resourceName := include "mcp-tools.resourceName" (dict "releaseName" $.Release.Name "mcpKey" $key) }}
+{{- $port := include "mcp-tools.mcpPort" (dict "mcp" $mcp) | int }}
 ---
 apiVersion: kagent.dev/v1alpha2
 kind: RemoteMCPServer
@@ -10,11 +11,15 @@ metadata:
   labels:
     {{- include "mcp-tools.mcpLabels" (dict "chartName" $.Chart.Name "chartVersion" $.Chart.Version "mcpKey" $key "releaseName" $.Release.Name "releaseService" $.Release.Service) | nindent 4 }}
 spec:
-  description: {{ default (printf "%s MCP server" $key) $mcp.description }}
+  description: {{ default (printf "%s MCP server" $key) $mcp.description | quote }}
   protocol: {{ default "STREAMABLE_HTTP" $mcp.protocol }}
   sseReadTimeout: {{ default "5m0s" $mcp.sseReadTimeout }}
-  terminateOnClose: {{ default true $mcp.terminateOnClose }}
+  terminateOnClose: {{ dig "terminateOnClose" true $mcp }}
   timeout: {{ default "30s" $mcp.timeout }}
-  url: {{ printf "http://%s.%s:%d/mcp" $resourceName $.Release.Namespace ($mcp.service.port | int) }}
+  url: {{ default (printf "http://%s.%s:%d%s" $resourceName $.Release.Namespace $port (default "/mcp" $mcp.path)) $mcp.url | quote }}
+  {{- with $mcp.headersFrom }}
+  headersFrom:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 {{- end }}
 {{- end }}

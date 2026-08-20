@@ -9,10 +9,14 @@ metadata:
   namespace: {{ $.Release.Namespace }}
   labels:
     {{- include "mcp-tools.mcpLabels" (dict "chartName" $.Chart.Name "chartVersion" $.Chart.Version "mcpKey" $key "releaseName" $.Release.Name "releaseService" $.Release.Service) | nindent 4 }}
+  {{- with (dig "service" "annotations" dict $mcp) }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
-  type: {{ default "ClusterIP" $mcp.service.type }}
+  type: {{ dig "service" "type" "ClusterIP" $mcp }}
   ports:
-    - port: {{ $mcp.service.port }}
+    - port: {{ include "mcp-tools.mcpPort" (dict "mcp" $mcp) }}
       targetPort: http
       protocol: TCP
       name: http

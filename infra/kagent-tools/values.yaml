@@ -1,9 +1,68 @@
 # Default values for mcp-tools
-# To add a new MCP, just add an entry under "mcps" — no template or Chart.yaml changes needed.
-# Agents are defined as individual templates under templates/agents/.
+# To add a new MCP, just add an entry under "mcps" -- no template or Chart.yaml changes needed.
+# To add a new ModelConfig, add an entry under "modelConfigs" -- same deal.
+# Agents are defined as individual templates under templates/agents/, and their
+# systemMessage lives in agents-rules/<agent>.md at the chart root.
 
-nameOverride: ""
-fullnameOverride: ""
+# Every resource is named <release>-<mcp-key>. There is deliberately no
+# nameOverride: the MCP labels double as the Deployment selector, which is
+# immutable, so a rename knob would break upgrades on existing releases.
+
+# Applied to every MCP pod. Override per-MCP with mcps.<key>.imagePullSecrets.
+imagePullSecrets: []
+# - name: my-registry-creds
+
+
+# ==============================================================================
+# MODEL CONFIGS
+# ==============================================================================
+# Each key under "modelConfigs" creates one kagent ModelConfig (and optionally
+# the Secret holding its API key). The key is the resource name, which is what
+# agents reference via agents.<agent>.modelConfig.
+modelConfigs:
+  vllm-gpt:
+    enabled: true
+    # name: vllm-gpt          # defaults to the key above
+    provider: OpenAI
+    model: /data/gpt-oss-20b
+
+    # Secret holding the API key, and the key inside it.
+    apiKeySecret: vllm-dummy-key
+    apiKeySecretKey: OPENAI_API_KEY
+
+    # Creates the Secret named in apiKeySecret above.
+    # Value must match the live Secret exactly -- this chart adopts the
+    # pre-existing "vllm-dummy-key" Secret rather than creating a fresh one,
+    # and on upgrade this value overwrites whatever is in the cluster.
+    # vLLM does not authenticate, hence "unused".
+    apiKeySecretData:
+      OPENAI_API_KEY: "unused"
+
+    # Rendered under the provider-specific field -- OpenAI -> openAI,
+    # AzureOpenAI -> azureOpenAI, Anthropic -> anthropic, and so on.
+    providerConfig:
+      baseUrl: http://vllm-llama3-engine-service/v1
+      # temperature: "0.7"
+      # maxTokens: 4096
+
+    # providerField: openAI   # only if a provider breaks the naming convention
+    # defaultHeaders: {}
+    # annotations: {}
+    # extraSpec: {}           # raw passthrough for spec fields not modelled here
+
+  # Embedding model. Shares the vllm-dummy-key Secret created by vllm-gpt above,
+  # so it deliberately does NOT set apiKeySecretData -- two blocks declaring the
+  # same apiKeySecret would render two Secrets with the same name.
+  vllm-emb:
+    enabled: true
+    provider: OpenAI
+    model: /data/bge-base-en-v1.5
+
+    apiKeySecret: vllm-dummy-key
+    apiKeySecretKey: OPENAI_API_KEY
+
+    providerConfig:
+      baseUrl: http://vllm-emb-embedding-engine-service.default.svc.cluster.local/v1
 
 
 # ==============================================================================
@@ -28,6 +87,7 @@ mcps:
     service:
       type: ClusterIP
       port: 8000
+      annotations: {}
 
     # Environment variables injected via ConfigMap
     env:
@@ -41,26 +101,79 @@ mcps:
         cpu: 500m
         memory: 512Mi
 
-    # Optional secret data (uncomment to use)
+    # Optional secret data -- creates a Secret and wires it in via envFrom.
     # secretData:
     #   ES_API_KEY: "my-api-key"
 
     serviceAccount:
       create: true
       annotations: {}
+      # name: ""              # used only when create: false
 
+    # RemoteMCPServer tuning (defaults shown)
+    # description: "elasticsearch-mcp MCP server"
+    # protocol: STREAMABLE_HTTP
+    # path: /mcp
+    # timeout: 30s
+    # sseReadTimeout: 5m0s
+    # terminateOnClose: true
+
+    # HTTP probes -- off by default because not every MCP image serves /health.
+    healthCheck:
+      enabled: false
+      path: /health
+      # readiness: { initialDelaySeconds: 10, periodSeconds: 10, timeoutSeconds: 5, failureThreshold: 3 }
+      # liveness:  { initialDelaySeconds: 30, periodSeconds: 30, timeoutSeconds: 5, failureThreshold: 3 }
+
+    podSecurityContext: {}
     securityContext: {}
     tolerations: []
     nodeSelector: {}
+    affinity: {}
+    podAnnotations: {}
+    podLabels: {}
     volumes: []
     volumeMounts: []
+    extraEnv: []
+    extraEnvFrom: []
     extraConfig: {}
 
+    # Example: mounting a custom CA bundle
+    # volumes:
+    #   - name: trusted-ca
+    #     configMap:
+    #       name: trusted-ca
+    #       items:
+    #         - key: ca-bundle.crt
+    #           path: extra-certificates.crt
+    # volumeMounts:
+    #   - name: trusted-ca
+    #     mountPath: /etc/ssl/certs/extra-certificates.crt
+    #     subPath: extra-certificates.crt
+    #     readOnly: true
+    # extraConfig:
+    #   REQUESTS_CA_BUNDLE: /etc/ssl/certs/extra-certificates.crt
+    #   SSL_CERT_FILE: /etc/ssl/certs/extra-certificates.crt
+    #   CURL_CA_BUNDLE: /etc/ssl/certs/extra-certificates.crt
+
   # ============================================================================
-  # trail MCP
+  # TRAIL MCP (placeholder -- fill in image/env before enabling)
   # ============================================================================
   trail-mcp:
     enabled: false
+    replicas: 1
+    image:
+      registry: ""
+      repository: ""
+      pullPolicy: IfNotPresent
+      tag: ""
+    service:
+      type: ClusterIP
+      port: 8000
+    env: {}
+    serviceAccount:
+      create: true
+      annotations: {}
 
   # ============================================================================
   # KAFKA MCP
@@ -78,6 +191,7 @@ mcps:
     service:
       type: ClusterIP
       port: 8000
+      annotations: {}
 
     env:
       KAFKA_BOOTSTRAP_SERVERS: "http://localhost:9092"
@@ -97,15 +211,25 @@ mcps:
       create: true
       annotations: {}
 
+    healthCheck:
+      enabled: false
+      path: /health
+
+    podSecurityContext: {}
     securityContext: {}
     tolerations: []
     nodeSelector: {}
+    affinity: {}
+    podAnnotations: {}
+    podLabels: {}
     volumes: []
     volumeMounts: []
+    extraEnv: []
+    extraEnvFrom: []
     extraConfig: {}
 
   # ============================================================================
-  # MONGO MCP
+  # MONGODB MCP
   # ============================================================================
   mongodb-mcp:
     enabled: true
@@ -120,6 +244,12 @@ mcps:
     service:
       type: ClusterIP
       port: 8000
+      annotations: {}
+
+    env:
+      MDB_MCP_CONNECTION_STRING: "mongodb://mongo8-primary:27017"
+      MCP_HOST: "0.0.0.0"
+      MCP_PORT: "8000"
 
     resources:
       requests:
@@ -133,23 +263,99 @@ mcps:
       create: true
       annotations: {}
 
+    healthCheck:
+      enabled: false
+      path: /health
+
+    podSecurityContext: {}
     securityContext: {}
     tolerations: []
     nodeSelector: {}
+    affinity: {}
+    podAnnotations: {}
+    podLabels: {}
     volumes: []
     volumeMounts: []
+    extraEnv: []
+    extraEnvFrom: []
     extraConfig: {}
+
+
 # ==============================================================================
 # AGENTS
 # ==============================================================================
-# Agent enable flags. The agent templates live under templates/agents/.
+# One template per agent under templates/agents/. Each agent's systemMessage is
+# read from agents-rules/<key>.md -- edit the prompt there, not in the template.
+# An agent only renders when both it and its backing MCP are enabled.
 agents:
   elasticsearch:
     enabled: true
-    modelConfig: "vllm-gpt"
+    modelConfigRef: "vllm-gpt"
+    stream: true
+    # name: elasticsearch-agent
+    # description: "..."                # defaults live in the template
+    # toolNames: []                     # overrides the template's default list
+    # annotations: {}
+
+    # Long-term memory. modelConfigRef must name a ModelConfig backed by an
+    # EMBEDDING model -- vllm-emb, not vllm-gpt -- since it generates the
+    # memory vectors. Required by the CRD whenever memory is enabled.
+    memory:
+      enabled: true
+      modelConfigRef: "vllm-emb"
+      ttlDays: 15
+
+    # Event-history compaction -> spec.declarative.context.compaction.
+    # Uncomment to enable: presence of the block is the switch (add
+    # "enabled: false" to turn it off without deleting the settings).
+    # Keys left out fall through to the CRD's own defaults
+    # (compactionInterval 5, overlapSize 2).
+    compaction:
+      compactionInterval: 5
+      tokenThreshold: 25000
+      overlapSize: 2
+      eventRetentionSize: 10
+      summarizer:
+        modelConfig: vllm-gpt
+
+    deployment:
+      labels:
+        app.kubernetes.io/instance: agent
+
   kafka:
     enabled: true
-    modelConfig: "vllm-gpt"
+    modelConfigRef: "vllm-gpt"
+    stream: true
+    memory:
+      enabled: true
+      modelConfigRef: "vllm-emb"
+      ttlDays: 15
+    compaction:
+      compactionInterval: 5
+      tokenThreshold: 25000
+      overlapSize: 2
+      eventRetentionSize: 10
+      summarizer:
+        modelConfig: vllm-gpt
+    deployment:
+      labels:
+        app.kubernetes.io/instance: agent
+
   mongodb:
     enabled: true
-    modelConfig: "vllm-gpt"
+    modelConfigRef: "vllm-gpt"
+    stream: true
+    memory:
+      enabled: true
+      modelConfigRef: "vllm-emb"
+      ttlDays: 15
+    compaction:
+      compactionInterval: 5
+      tokenThreshold: 25000
+      overlapSize: 2
+      eventRetentionSize: 10
+      summarizer:
+        modelConfig: vllm-gpt
+    deployment:
+      labels:
+        app.kubernetes.io/instance: agent

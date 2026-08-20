@@ -10,12 +10,6 @@ metadata:
   labels:
     {{- include "mcp-tools.mcpLabels" (dict "chartName" $.Chart.Name "chartVersion" $.Chart.Version "mcpKey" $key "releaseName" $.Release.Name "releaseService" $.Release.Service) | nindent 4 }}
 data:
-  {{- range $envKey, $envVal := $mcp.env }}
-  {{ $envKey }}: {{ $envVal | quote }}
-  {{- end }}
-  DO_NOT_TRACK: "1"
-  {{- range $cfgKey, $cfgVal := (default dict $mcp.extraConfig) }}
-  {{ $cfgKey }}: {{ $cfgVal | quote }}
-  {{- end }}
+  {{- include "mcp-tools.configmapData" (dict "mcp" $mcp) | nindent 2 }}
 {{- end }}
 {{- end }}

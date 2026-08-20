@@ -1,6 +1,8 @@
 {{- range $key, $mcp := .Values.mcps }}
 {{- if $mcp.enabled }}
 {{- $resourceName := include "mcp-tools.resourceName" (dict "releaseName" $.Release.Name "mcpKey" $key) }}
+{{- $port := include "mcp-tools.mcpPort" (dict "mcp" $mcp) | int }}
+{{- $probes := dig "healthCheck" dict $mcp }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -10,7 +12,11 @@ metadata:
   labels:
     {{- include "mcp-tools.mcpLabels" (dict "chartName" $.Chart.Name "chartVersion" $.Chart.Version "mcpKey" $key "releaseName" $.Release.Name "releaseService" $.Release.Service) | nindent 4 }}
 spec:
-  replicas: {{ default 1 $mcp.replicas }}
+  replicas: {{ dig "replicas" 1 $mcp }}
+  {{- with $mcp.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "mcp-tools.mcpSelectorLabels" (dict "mcpKey" $key "releaseName" $.Release.Name) | nindent 6 }}
@@ -18,14 +24,24 @@ spec:
     metadata:
       annotations:
         checksum/configmap: {{ include "mcp-tools.configmapChecksum" (dict "mcp" $mcp) }}
+        {{- with $mcp.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       labels:
         {{- include "mcp-tools.mcpSelectorLabels" (dict "mcpKey" $key "releaseName" $.Release.Name) | nindent 8 }}
+        {{- with $mcp.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
-      {{- with $.Values.imagePullSecrets }}
+      {{- with (default $.Values.imagePullSecrets $mcp.imagePullSecrets) }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ $resourceName }}
+      serviceAccountName: {{ if (dig "serviceAccount" "create" true $mcp) }}{{ $resourceName }}{{ else }}{{ dig "serviceAccount" "name" "default" $mcp }}{{ end }}
+      {{- with $mcp.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- with $mcp.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -34,14 +50,18 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with $mcp.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ $key }}
           {{- with $mcp.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          image: "{{ $mcp.image.registry }}/{{ $mcp.image.repository }}:{{ $mcp.image.tag }}"
-          imagePullPolicy: {{ default "IfNotPresent" $mcp.image.pullPolicy }}
+          image: {{ include "mcp-tools.mcpImage" (dict "mcp" $mcp "mcpKey" $key) | quote }}
+          imagePullPolicy: {{ dig "image" "pullPolicy" "IfNotPresent" $mcp }}
           {{- with $mcp.command }}
           command:
             {{- toYaml . | nindent 12 }}
@@ -54,24 +74,10 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-
-          volumeMounts:
-            {{- with $mcp.volumeMounts }}
+          {{- with $mcp.extraEnv }}
+          env:
             {{- toYaml . | nindent 12 }}
-            {{- end }}
-            # - name: trusted-ca
-            #   mountPath: /etc/ssl/certs/extra-certificates.crt
-            #   subPath: extra-certificates.crt
-            #   readOnly: true
-
-          # env:
-          #   - name: REQUESTS_CA_BUNDLE
-          #     value: /etc/ssl/certs/extra-certificates.crt
-          #   - name: SSL_CERT_FILE
-          #     value: /etc/ssl/certs/extra-certificates.crt
-          #   - name: CURL_CA_BUNDLE
-          #     value: /etc/ssl/certs/extra-certificates.crt
-
+          {{- end }}
           envFrom:
             - configMapRef:
                 name: {{ $resourceName }}
@@ -79,40 +85,38 @@ spec:
             - secretRef:
                 name: {{ $resourceName }}
             {{- end }}
-
+            {{- with $mcp.extraEnvFrom }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           ports:
             - name: http
-              containerPort: {{ $mcp.service.port }}
+              containerPort: {{ $port }}
               protocol: TCP
-
-          # {{- if (default true (dig "healthCheck" "enabled" true $mcp)) }}
-          # readinessProbe:
-          #   httpGet:
-          #     path: {{ default "/health" (dig "healthCheck" "path" "/health" $mcp) }}
-          #     port: http
-          #   initialDelaySeconds: 10
-          #   periodSeconds: 10
-          #   timeoutSeconds: 5
-          #   failureThreshold: 3
-          # livenessProbe:
-          #   httpGet:
-          #     path: {{ default "/health" (dig "healthCheck" "path" "/health" $mcp) }}
-          #     port: http
-          #   initialDelaySeconds: 30
-          #   periodSeconds: 30
-          #   timeoutSeconds: 5
-          #   failureThreshold: 3
-          # {{- end }}
-
+          {{- if dig "enabled" false $probes }}
+          readinessProbe:
+            httpGet:
+              path: {{ dig "path" "/health" $probes }}
+              port: http
+            initialDelaySeconds: {{ dig "readiness" "initialDelaySeconds" 10 $probes }}
+            periodSeconds: {{ dig "readiness" "periodSeconds" 10 $probes }}
+            timeoutSeconds: {{ dig "readiness" "timeoutSeconds" 5 $probes }}
+            failureThreshold: {{ dig "readiness" "failureThreshold" 3 $probes }}
+          livenessProbe:
+            httpGet:
+              path: {{ dig "path" "/health" $probes }}
+              port: http
+            initialDelaySeconds: {{ dig "liveness" "initialDelaySeconds" 30 $probes }}
+            periodSeconds: {{ dig "liveness" "periodSeconds" 30 $probes }}
+            timeoutSeconds: {{ dig "liveness" "timeoutSeconds" 5 $probes }}
+            failureThreshold: {{ dig "liveness" "failureThreshold" 3 $probes }}
+          {{- end }}
+          {{- with $mcp.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with $mcp.volumes }}
       volumes:
-        {{- with $mcp.volumes }}
         {{- toYaml . | nindent 8 }}
-        {{- end }}
-        # - name: trusted-ca
-        #   configMap:
-        #     name: trusted-ca
-        #     items:
-        #       - key: ca-bundle.crt
-        #         path: extra-certificates.crt
+      {{- end }}
 {{- end }}
 {{- end }}

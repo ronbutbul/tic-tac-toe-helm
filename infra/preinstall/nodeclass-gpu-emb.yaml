@@ -1,0 +1,17 @@
+apiVersion: eks.amazonaws.com/v1
+kind: NodeClass
+metadata:
+  name: gpu-emb
+spec:
+  ephemeralStorage:
+    iops: 3000
+    size: 80Gi
+    throughput: 125
+  networkPolicy: DefaultAllow
+  networkPolicyEventLogs: Disabled
+  role: eksctl-tic-automode-cluster-AutoModeNodeRole-CyfXzGjawZzw
+  securityGroupSelectorTerms:
+  - id: sg-0817e05c7ee1a2f05
+  snatPolicy: Random
+  subnetSelectorTerms:
+  - id: subnet-0f6d44ce6c4818cf0

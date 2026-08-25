@@ -1,0 +1,46 @@
+singleNamespace: true
+workflow:
+  serviceAccount:
+    create: true
+    name: argo-workflow
+
+  rbac:
+    create: true
+
+controller:
+  workflowDefaults:
+    spec:
+      serviceAccountName: argo-workflow
+
+
+server:
+  authModes:
+    - server
+  serviceType: ClusterIP
+
+  secure: false
+
+  ingress:
+    enabled: true
+
+    ingressClassName: nginx
+
+    annotations:
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+
+    hosts:
+      - argoworkflows.tsgs.aws2.rafael.co.il
+
+    paths:
+      - /
+
+    pathType: Prefix
+
+    tls:
+      - secretName: tsgs-saas-aws-wildcard-cert
+        hosts:
+          - argoworkflows.tsgs.aws2.rafael.co.il
+
+images:
+  pullPolicy: IfNotPresent

@@ -371,7 +371,7 @@ agents:
     enabled: true
     name: test
     description: "ema shelha begeces"
-    modelConfigRef: "vllm-gpt"
+    modelConfigRef: "bedrock-guardrailed"
     runtime: python
     stream: true
     memory:

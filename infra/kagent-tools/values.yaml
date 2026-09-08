@@ -30,6 +30,10 @@ modelConfigs:
     apiKeySecret: vllm-dummy-key
     apiKeySecretKey: OPENAI_API_KEY
 
+    # apiKeySecretDataB64 is the same thing for values that are already
+    # base64-encoded (e.g. copied out of `kubectl get secret -o yaml`); it
+    # renders as Secret.data instead of Secret.stringData.
+    #
     # Creates the Secret named in apiKeySecret above.
     # Value must match the live Secret exactly -- this chart adopts the
     # pre-existing "vllm-dummy-key" Secret rather than creating a fresh one,

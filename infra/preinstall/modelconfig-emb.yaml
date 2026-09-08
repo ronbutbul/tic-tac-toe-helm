@@ -1,0 +1,35 @@
+apiVersion: kagent.dev/v1alpha2
+kind: ModelConfig
+metadata:
+  annotations:
+    argocd.argoproj.io/tracking-id: kagent-tools:kagent.dev/ModelConfig:default/vllm-emb
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"kagent.dev/v1alpha2","kind":"ModelConfig","metadata":{"annotations":{"argocd.argoproj.io/tracking-id":"kagent-tools:kagent.dev/ModelConfig:default/vllm-emb"},"labels":{"app.kubernetes.io/component":"vllm-emb","app.kubernetes.io/instance":"kagent-tools","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"vllm-emb","helm.sh/chart":"mcp-tools-0.2.0"},"name":"vllm-emb","namespace":"default"},"spec":{"apiKeySecret":"vllm-dummy-key","apiKeySecretKey":"OPENAI_API_KEY","model":"/data/bge-base-en-v1.5","openAI":{"baseUrl":"http://vllm-emb-embedding-engine-service.default.svc.cluster.local/v1"},"provider":"OpenAI"}}
+  creationTimestamp: "2026-08-19T14:13:11Z"
+  generation: 1
+  labels:
+    app.kubernetes.io/component: vllm-emb
+    app.kubernetes.io/instance: kagent-tools
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: vllm-emb
+    helm.sh/chart: mcp-tools-0.2.0
+  name: vllm-emb
+  namespace: default
+  resourceVersion: "105785589"
+  uid: e83ea92c-c672-4dfa-8566-0bc5a72a1da2
+spec:
+  apiKeySecret: vllm-dummy-key
+  apiKeySecretKey: OPENAI_API_KEY
+  model: /data/bge-base-en-v1.5
+  openAI:
+    baseUrl: http://vllm-emb-embedding-engine-service.default.svc.cluster.local/v1
+  provider: OpenAI
+status:
+  conditions:
+  - lastTransitionTime: "2026-08-19T14:13:11Z"
+    message: Model configuration accepted
+    reason: ModelConfigReconciled
+    status: "True"
+    type: Accepted
+  observedGeneration: 1
+  secretHash: dbe4d864db744d7009d4b63e101d4727ef369523de828ebf217b6ab54f881c8c

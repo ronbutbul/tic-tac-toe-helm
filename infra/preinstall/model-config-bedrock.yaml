@@ -1,0 +1,14 @@
+apiVersion: kagent.dev/v1alpha2
+kind: ModelConfig
+metadata:
+  name: bedrock-guardrailed
+  namespace: default
+spec:
+  apiKeySecret: kagent-bedrock
+  apiKeySecretKey: AWS_API_KEY
+  defaultHeaders:
+    X-Amzn-Bedrock-GuardrailIdentifier: arn:aws:bedrock:eu-central-1:941284018955:guardrail/wrfcu805qvyf
+    X-Amzn-Bedrock-GuardrailVersion: DRAFT
+  model: openai.gpt-oss-120b-1:0
+  openAI:
+    baseUrl: https://bedrock-runtime.eu-central-1.amazonaws.com/openai/v1

@@ -1,0 +1,20 @@
+apiVersion: kagent.dev/v1alpha2
+kind: ModelConfig
+metadata:
+  name: bedrock-guardrailed-new
+  namespace: default
+spec:
+  provider: OpenAI
+
+  apiKeySecret: vllm-dummy-key
+  apiKeySecretKey: OPENAI_API_KEY
+
+
+  model: openai.gpt-oss-120b-1:0
+
+  defaultHeaders:
+    X-Amzn-Bedrock-GuardrailIdentifier: arn:aws:bedrock:eu-central-1:941284018955:guardrail/wrfcu805qvyf
+    X-Amzn-Bedrock-GuardrailVersion: DRAFT
+
+  openAI:
+    baseUrl: http://bedrock-sigv4-proxy.default.svc.cluster.local:8080/openai/v1

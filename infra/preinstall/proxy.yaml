@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bedrock-sigv4-proxy
+  namespace: default
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: bedrock-sigv4-proxy
+
+  template:
+    metadata:
+      labels:
+        app: bedrock-sigv4-proxy
+
+    spec:
+      # IMPORTANT:
+      # Put here the ServiceAccount that has the Bedrock IAM Role via IRSA
+      serviceAccountName: kagent-bedrock
+
+      containers:
+        - name: proxy
+          image: public.ecr.aws/aws-observability/aws-sigv4-proxy:1.10
+          imagePullPolicy: IfNotPresent
+
+          args:
+            # v1.10 expects a full listen address
+            - --port=0.0.0.0:8080
+
+            # Bedrock SigV4 signing
+            - --name=bedrock
+            - --region=eu-central-1
+
+            # Upstream Bedrock endpoint
+            - --host=bedrock-runtime.eu-central-1.amazonaws.com
+            - --sign-host=bedrock-runtime.eu-central-1.amazonaws.com
+
+            # Remove "Authorization: Bearer dummy"
+            # coming from the OpenAI client
+            - --strip=Authorization
+
+            # Debug while testing
+            - --verbose
+            - --log-failed-requests
+            - --log-signing-process
+
+          env:
+            - name: AWS_REGION
+              value: eu-central-1
+
+            - name: AWS_DEFAULT_REGION
+              value: eu-central-1
+
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 5
+
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bedrock-sigv4-proxy
+  namespace: default
+spec:
+  type: ClusterIP
+
+  selector:
+    app: bedrock-sigv4-proxy
+
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: http

@@ -20,7 +20,11 @@ database:
         tag: "0.8.6-pg18-trixie"
         pullPolicy: IfNotPresent
 
-
+controller:
+  replicas: 1
+  agentDeployment:
+    serviceAccountName: "kagent-bedrock"
+    
 k8s-agent:
   enabled: true
   modelConfigRef: "vllm-gpt"

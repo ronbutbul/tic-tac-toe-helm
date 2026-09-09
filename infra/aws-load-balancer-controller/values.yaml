@@ -113,7 +113,8 @@ podLabels: {}
 additionalLabels: {}
 
 # Enable cert-manager
-enableCertManager: false
+# Recommended for ArgoCD/GitOps so webhook certificates are issued and rotated consistently.
+enableCertManager: true
 
 # Overrideable variables when enableCertManager is set to true
 certManager:
@@ -242,7 +243,8 @@ webhookNamespaceSelectors:
 #   - enabled
 
 # keepTLSSecret specifies whether to reuse existing TLS secret for chart upgrade
-keepTLSSecret: true
+# Must be false when cert-manager owns certificate lifecycle/rotation.
+keepTLSSecret: false
 
 # Maximum number of concurrently running reconcile loops for service (default 3)
 serviceMaxConcurrentReconciles:

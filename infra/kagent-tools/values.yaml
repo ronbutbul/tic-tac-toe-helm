@@ -396,7 +396,7 @@ mcps:
 agents:
   elasticsearch:
     enabled: true
-    modelConfigRef: "vllm-gpt"
+    modelConfigRef: "bedrock-guardrailed"
     stream: true
     # name: elasticsearch-agent
     # description: "..."                # defaults live in the template
@@ -430,7 +430,7 @@ agents:
 
   kafka:
     enabled: true
-    modelConfigRef: "vllm-gpt"
+    modelConfigRef: "bedrock-guardrailed"
     stream: true
     memory:
       enabled: true
@@ -449,7 +449,7 @@ agents:
 
   mongodb:
     enabled: true
-    modelConfigRef: "vllm-gpt"
+    modelConfigRef: "bedrock-guardrailed"
     stream: true
     memory:
       enabled: true

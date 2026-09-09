@@ -70,6 +70,108 @@ modelConfigs:
 
 
 # ==============================================================================
+# PROXIES
+# ==============================================================================
+# Sidecar-less signing proxies that sit between an agent and an upstream API.
+# Each key creates a Deployment + Service (and optionally a ServiceAccount).
+#
+# Unlike MCPs, a proxy is NOT named <release>-<key>: the key is the resource
+# name, because the name is part of the proxy's contract -- a ModelConfig
+# baseUrl points at its in-cluster Service DNS. Override with .name.
+proxies:
+  # AWS SigV4 signing proxy for Bedrock. Agents speak plain OpenAI to this
+  # Service; it signs each request with the IAM role bound to its
+  # ServiceAccount and forwards it to Bedrock. That is what lets the Bedrock
+  # ModelConfig carry no AWS credential at all.
+  bedrock-sigv4-proxy:
+    enabled: false
+    # name: bedrock-sigv4-proxy   # defaults to the key above
+    replicas: 1
+
+    image:
+      registry: public.ecr.aws
+      repository: aws-observability/aws-sigv4-proxy
+      pullPolicy: IfNotPresent
+      tag: "1.10"
+
+    # The IAM role is attached to this ServiceAccount via IRSA, so the proxy
+    # needs no credentials of its own. create: false adopts a ServiceAccount
+    # that already carries the eks.amazonaws.com/role-arn annotation; flip it to
+    # true and set annotations here to have the chart own it instead.
+    serviceAccount:
+      create: false
+      name: kagent-bedrock
+      annotations: {}
+      # eks.amazonaws.com/role-arn: arn:aws:iam::<account>:role/<bedrock-role>
+
+    # Drives the container port, the --port arg and the Service target at once,
+    # so they cannot drift apart.
+    service:
+      type: ClusterIP
+      port: 8080
+      annotations: {}
+
+    # Rendered into the container args by mcp-tools.proxyArgs.
+    sigv4:
+      # AWS service to sign for, and the region to sign in.
+      name: bedrock
+      region: eu-central-1
+
+      # Upstream endpoint. signHost defaults to host when omitted.
+      host: bedrock-runtime.eu-central-1.amazonaws.com
+      # signHost: bedrock-runtime.eu-central-1.amazonaws.com
+
+      # Headers dropped before signing. The OpenAI client always sends an
+      # "Authorization: Bearer <dummy>"; leaving it in place would collide with
+      # the SigV4 Authorization header the proxy adds.
+      strip:
+        - Authorization
+
+      # listenAddress: 0.0.0.0
+
+      # Signing diagnostics. Verbose logging of the signing process is useful
+      # while wiring IRSA up, but noisy once it works -- turn these off in a
+      # steady-state cluster.
+      verbose: true
+      logFailedRequests: true
+      logSigningProcess: true
+
+    # extraArgs: []             # raw args appended after the generated ones
+    # args: []                  # set to bypass sigv4/extraArgs entirely
+
+    env:
+      AWS_REGION: eu-central-1
+      AWS_DEFAULT_REGION: eu-central-1
+
+    # extraEnv: []              # raw env entries, e.g. valueFrom blocks
+    # extraEnvFrom: []
+
+    # TCP probes: a signing proxy forwards every path upstream, so it has no
+    # local health endpoint to hit.
+    healthCheck:
+      enabled: true
+      readiness:
+        initialDelaySeconds: 2
+        periodSeconds: 5
+      liveness:
+        initialDelaySeconds: 5
+        periodSeconds: 10
+
+    resources: {}
+      # requests:
+      #   cpu: 50m
+      #   memory: 64Mi
+      # limits:
+      #   memory: 256Mi
+
+    # podAnnotations: {}
+    # podLabels: {}
+    # nodeSelector: {}
+    # tolerations: []
+    # affinity: {}
+
+
+# ==============================================================================
 # MCP SERVERS
 # ==============================================================================
 # Each key under "mcps" creates: Deployment, Service, ConfigMap, ServiceAccount,

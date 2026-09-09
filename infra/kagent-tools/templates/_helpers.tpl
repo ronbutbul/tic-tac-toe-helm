@@ -57,13 +57,15 @@ Container port for an MCP. Defaults to 8000 when service.port is unset.
 {{- end }}
 
 {{/*
-Fully qualified image reference for an MCP. Registry is optional so that
-plain "repo:tag" images (e.g. docker.io library images) still work.
+Fully qualified image reference. Registry is optional so that plain "repo:tag"
+images (e.g. docker.io library images) still work. Pass "section" to name the
+values block in the error messages; it defaults to "mcps".
 */}}
 {{- define "mcp-tools.mcpImage" -}}
-{{- $img := required (printf "mcps.%s.image is required" .mcpKey) .mcp.image -}}
-{{- $repo := required (printf "mcps.%s.image.repository is required" .mcpKey) $img.repository -}}
-{{- $tag := required (printf "mcps.%s.image.tag is required" .mcpKey) $img.tag -}}
+{{- $section := default "mcps" .section -}}
+{{- $img := required (printf "%s.%s.image is required" $section .mcpKey) .mcp.image -}}
+{{- $repo := required (printf "%s.%s.image.repository is required" $section .mcpKey) $img.repository -}}
+{{- $tag := required (printf "%s.%s.image.tag is required" $section .mcpKey) $img.tag -}}
 {{- if $img.registry -}}
 {{- printf "%s/%s:%s" $img.registry $repo (toString $tag) -}}
 {{- else -}}
@@ -142,4 +144,56 @@ context:
       {{- end }}
     {{- end }}
 {{- end -}}
+{{- end }}
+
+{{/*
+Resource name for a proxy: proxies.<key>.name, defaulting to the key.
+
+Deliberately NOT release-prefixed like "mcp-tools.resourceName". A proxy is
+addressed from outside the chart -- a ModelConfig baseUrl points at its Service
+DNS name -- so the name is part of its contract, exactly like a ModelConfig's.
+Call with: (dict "proxy" $proxy "proxyKey" $key)
+*/}}
+{{- define "mcp-tools.proxyName" -}}
+{{- default .proxyKey .proxy.name | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Listen/container/Service port for a proxy. Defaults to 8080 when unset.
+*/}}
+{{- define "mcp-tools.proxyPort" -}}
+{{- dig "service" "port" 8080 .proxy | int }}
+{{- end }}
+
+{{/*
+Container args for an aws-sigv4-proxy, built from proxies.<key>.sigv4.
+
+Set proxies.<key>.args to bypass this entirely and pass raw args instead.
+--port is derived from the same value as the containerPort and the Service
+target, so the three can never drift apart.
+Call with: (dict "proxy" $proxy "proxyKey" $key)
+*/}}
+{{- define "mcp-tools.proxyArgs" -}}
+{{- $sig := dig "sigv4" dict .proxy -}}
+{{- $host := required (printf "proxies.%s.sigv4.host is required (the upstream AWS endpoint)" .proxyKey) $sig.host -}}
+- --port={{ dig "listenAddress" "0.0.0.0" $sig }}:{{ include "mcp-tools.proxyPort" (dict "proxy" .proxy) }}
+- --name={{ required (printf "proxies.%s.sigv4.name is required (the AWS service to sign for, e.g. bedrock)" .proxyKey) $sig.name }}
+- --region={{ required (printf "proxies.%s.sigv4.region is required" .proxyKey) $sig.region }}
+- --host={{ $host }}
+- --sign-host={{ default $host $sig.signHost }}
+{{- range $header := (default list $sig.strip) }}
+- --strip={{ $header }}
+{{- end }}
+{{- if dig "verbose" false $sig }}
+- --verbose
+{{- end }}
+{{- if dig "logFailedRequests" false $sig }}
+- --log-failed-requests
+{{- end }}
+{{- if dig "logSigningProcess" false $sig }}
+- --log-signing-process
+{{- end }}
+{{- range $arg := (default list .proxy.extraArgs) }}
+- {{ $arg | quote }}
+{{- end }}
 {{- end }}

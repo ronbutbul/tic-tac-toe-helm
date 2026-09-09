@@ -2,29 +2,33 @@
 # MODEL CONFIGS
 # ==============================================================================
 modelConfigs:
-  # Bedrock via its OpenAI-compatible endpoint, with an AWS Bedrock guardrail
-  # applied through request headers.
+
   bedrock-guardrailed:
     enabled: true
     provider: OpenAI
     model: openai.gpt-oss-120b-1:0
 
-    apiKeySecret: kagent-bedrock
-    apiKeySecretKey: AWS_API_KEY
-
-    # Renders the kagent-bedrock Secret as Secret.data (already base64-encoded,
-    # copied verbatim from the cluster). This is a live AWS credential committed
-    # to the repo by choice; rotate it in Bedrock if the repo is ever shared.
-    apiKeySecretDataB64:
-      AWS_API_KEY: "YmVkcm9jay1hcGkta2V5LVltVmtjbTlqYXk1aGJXRjZiMjVoZDNNdVkyOXRMejlCWTNScGIyNDlRMkZzYkZkcGRHaENaV0Z5WlhKVWIydGxiaVpZTFVGdGVpMUJiR2R2Y21sMGFHMDlRVmRUTkMxSVRVRkRMVk5JUVRJMU5pWllMVUZ0ZWkxRGNtVmtaVzUwYVdGc1BVRlRTVUUxVjB0SVIwcE5SbEpSUlZaU1drZEpKVEpHTWpBeU5qQTVNRGdsTWtabGRTMWpaVzUwY21Gc0xURWxNa1ppWldSeWIyTnJKVEpHWVhkek5GOXlaWEYxWlhOMEpsZ3RRVzE2TFVSaGRHVTlNakF5TmpBNU1EaFVNRGN5TkRBMldpWllMVUZ0ZWkxRmVIQnBjbVZ6UFRRek1qQXdKbGd0UVcxNkxWTmxZM1Z5YVhSNUxWUnZhMlZ1UFVsUmIwcGlNMHB3V2pKc2RWZ3lWbXBGU1dZbE1rWWxNa1lsTWtZbE1rWWxNa1lsTWtZbE1rWWxNa1lsTWtZbE1rWjNSV0ZFUjFZeFRGZE9iR0p1VW5sWlYzZDBUVk5LU0UxRlZVTkpRVGRuZERoV1ZIQlBOMjFMT0hkRlJuVkVWRTVFSlRKQ09XaFNhVXRNUmtvbE1rSnRkbkl4T0hSNVRreFlUek5CYVVWQmJrOGxNa0pXVkVWWFJrbFlabEYzY3pWbk9VeDVUVzAwVDBvMlFuQlliekZSZHlVeVJrOXJaWGxSYTFCSWJrbHhhbmRWU1ZWU1FVSkhaM2MxVGtSRmVVOUVVWGROVkdjMVRsUlZhVVJQY0VWdFIza3pTV28zUzFwV1UyWnBlWEp6UWt0a2VYVjZORkZPTVVKUVJ6Tk9VWHB5T0RGMVkwdHFPRkIxV1dkR09VaFJPRWh6YlZaTFpFOVRVa1kxUTFsYU9FWmpXRzlJTVVkRFVrRnBUemRSZW04NVJ5VXlRblpCZEV0SWRXNXlObVV4UmpoYVFuZDBVVWhEWjI0Mk1GSmhkVGxYU2t0MlppVXlSbkY0U2xWVFpUUnBZVUpPV21OaWFWQkpRMFJGZWt4b1RTVXlSbEJFVjNRM1oycENSV2htUnpCNGRUVXpPR3AwWm1oVGEwcHdOWEZ4UW1kalNXZ3dTazVuV1dveWVsUkVTMGw2UmsweFptcEVWR05tWXpseEpUSkdTRzFaUW5aVVNsZFVUSFZaZDBkblUxRmlPRnB1U0ZaUFZHd2xNa0pyWlV4ek5YTnRSeVV5UmtwNlNuRnRaMFEzTTJVMFEzWm1kWE5QYkZWeGJEQTJXVEZ3Vm1nMmNGbzJZekpTZFdsMlpYQnViSGMyYmxaTFJUaGFWMFJLYmpZMFdYa3pSVEpHY2lVeVJrZGpkbk5hT0RFMk4wcHZSaVV5UW5aWWVVaHVURVJESlRKQ2NFdHZZbTV3YTBFM0pUSkdRMDV1ZEhwWVRVOXlkM3BJUmt4U2VUTnNhREphU0dKMk9VcFFRMFV3VW1wT1JYaHhTVXR0TjFKTkpUSkdlRmQ0UVRaQkpUSkNWa055U1RaeVpXRkpUbXh6VlVkbFZ5VXlRa0ZwU2pCMVZtUTNWV0Z1UVVaa1ZFUlNNek5XZW14bmMxTlpjVlpSTjI1clRXaExhMU5UTUVKMVFXVllXRFY2YVVSeVduSkJRekJsYWxoNFlXeEhOMGRxV2xWWFZrVjBKVEpHZGxkcVJuRmFiVk0yYVhwNVQyNW9kbnBLV1hwTFVIbE1XVWx5VUhJM1FrMXlaSFY0Y1ZwaGF6VlJaVVJNU0ROV2EzZ3laRVpIVWxSNlJteHdXa2hwTkZKWmVGbHJkWEZPZG04eFRrTnZaVFYxYVRoMGNYQkpVRGxsV0NVeVFrTndNVzV5WWtSdE5rRlBKVEpDVFdwNVFYTldZemhtTW10V1NXZFViR3cxUzBSWmJIaGFiVEZaYTJaWlQyNHpVRVlsTWtaYVlUZDRaVmQ0ZVhaWFpYSXpaMDVyYjIxNlVETnlkMkpMY21kdlNsTnJWWE4wSlRKQ09ISnBaelJpV1hWbmQxcHdRamx0UVhjMk0ybFpUMEo0UlhWNU9XVXpOV3BtUlVaMFoybGhTVGRHUzBwYVlXVm1lVEIxTjBoa2FtaGpSMFZ1YVc5UlNtRkNUMndsTWtKR2QzbEdSMmg2ZFNVeVJqSkxKVEpHYUVFMWVsVllVallsTWtZNVNWTm5UWGxIVFdjbE1rWjZKVEpDTWtKWFVGUkhlRFpySlRKQ09HOWFOMnBCZEc5b2RWVm9lbGhPZDNKNFVVcERRWHBFTVZoM1pXMTFaVGRPTTJsRFozVlZkbFUwVW0xR1pHMU5WMVV3YmxWbk5IbERURTlEYURnNFkwWjZialJ3VGpsVlIzSjBjamROT0Zoa2J5VXlRazFQU0hVbE1rWjBVVWRQYzJORFVGQkZOMlpXUlNVeVFrdDNTVUZxUTBwNFZGRkpWbFJLV0ZGQ01tMTNVM041YjJGU1REQWxNa0pVYVZFelZIZFpWMVZOVFhwMFYwWldWV3RxUTAxTGEwZHBSRlZCTlhwUlExRWxNa1psT0RaVlpHMUZXa1psY3pReFRFWWxNa1k0VW5KcmExbDZiRkpuT0hrMk1VUlJOVmcyYVd4R1lXVldPWFZSWkdoT1lqbFdRbnBuY0ZsS2RIVjRhbFpyV2xOVlFWUnJkeVV5UWpobFNFVndTRmg1TTNCMWFXVTVUWGg0Y2toV2FGQkVhRTAxZGpkbGNUVmlaM1JsYUZOT1JHMDRRVTlOYkZRME0yRndhMVpMWTFab01EVTRPVTVwTUdzNFFuQkpjRXd6ZWxCWWVGVkpaRTFDYUhkUlpYUXdSWFZqWlVsRWNWa2xNa1k1YzFSbE0wMUZVV2RJUVhObmJYZE9PSGh6WXpSa1IxbG1lbEZLTTNjbE1rWm9kM2h4ZEc5NWRITlliVkZVZWxGcmMyZFRRbWxyTkVsNWMwZHpOMDUyZW1OWFExYzBabUkyT0VwSmFDVXlSbkZKYlRSUFVFTm5PRFpFVFZwTWJqWlRiV2hVT0VsUVVHbHlla0pRWTNRM1RGaHhialZzTVhkTEpUSkdla2xVYXpSMWVYTkNNVE5GVjA1V2NFSXdWMVZwU0hVM05HZHJVRkFsTWtKV1JrMUVWSEJ0YTBOSFZFRjJhRWx2TW5KS1IyVk9RMnRqVWpWaFdGcFVTRTV4WnpkSFJDVXlSbVU1Y0dSUGFraEVla2huV2xjbVdDMUJiWG90VTJsbmJtRjBkWEpsUFRCa1pUSmtOMlV3TkROaU5UVXhNalk1WkRSbVlUUmxNbUU1TjJGa1lXTXhaakZoTjJabVltWTVOVGN3TUdGbU5qUTVPRGN3TWpZNE5EYzJNalZqWkdFbVdDMUJiWG90VTJsbmJtVmtTR1ZoWkdWeWN6MW9iM04wSmxabGNuTnBiMjQ5TVE9PQ=="
+    apiKeySecret: vllm-dummy-key
+    apiKeySecretKey: OPENAI_API_KEY
 
     defaultHeaders:
       X-Amzn-Bedrock-GuardrailIdentifier: "arn:aws:bedrock:eu-central-1:941284018955:guardrail/wrfcu805qvyf"
       X-Amzn-Bedrock-GuardrailVersion: "DRAFT"
 
     providerConfig:
-      baseUrl: https://bedrock-runtime.eu-central-1.amazonaws.com/openai/v1
+      baseUrl: http://bedrock-sigv4-proxy.default.svc.cluster.local:8080/openai/v1
 
+
+
+# ==============================================================================
+# PROXIES
+# ==============================================================================
+# Signs Bedrock requests with the IAM role on the kagent-bedrock ServiceAccount
+# (IRSA). Everything else -- image, region, upstream host, stripped headers --
+# comes from the defaults in values.yaml; this only turns it on.
+proxies:
+  bedrock-sigv4-proxy:
+    enabled: true
 
 # ==============================================================================
 # MCP SERVERS

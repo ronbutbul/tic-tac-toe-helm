@@ -7,6 +7,14 @@ Model configs:
 {{- end }}
 {{- end }}
 
+Proxies:
+{{- range $key, $proxy := .Values.proxies }}
+{{- if $proxy.enabled }}
+{{- $proxyName := include "mcp-tools.proxyName" (dict "proxy" $proxy "proxyKey" $key) }}
+  - {{ $proxyName }} -> http://{{ $proxyName }}.{{ $.Release.Namespace }}.svc.cluster.local:{{ include "mcp-tools.proxyPort" (dict "proxy" $proxy) }} (sa: {{ dig "serviceAccount" "name" $proxyName $proxy }})
+{{- end }}
+{{- end }}
+
 MCP servers:
 {{- range $key, $mcp := .Values.mcps }}
 {{- if $mcp.enabled }}

@@ -1,0 +1,167 @@
+{{- range $key, $proxy := .Values.proxies }}
+{{- if $proxy.enabled }}
+{{- $name := include "mcp-tools.proxyName" (dict "proxy" $proxy "proxyKey" $key) }}
+{{- $port := include "mcp-tools.proxyPort" (dict "proxy" $proxy) | int }}
+{{- $probes := dig "healthCheck" dict $proxy }}
+{{- $sa := dig "serviceAccount" dict $proxy }}
+{{- $saName := $sa.name }}
+{{- if and (not $saName) (dig "create" false $sa) }}
+{{- $saName = $name }}
+{{- end }}
+{{- $labels := include "mcp-tools.mcpLabels" (dict "chartName" $.Chart.Name "chartVersion" $.Chart.Version "mcpKey" $name "releaseName" $.Release.Name "releaseService" $.Release.Service) }}
+{{- $selector := include "mcp-tools.mcpSelectorLabels" (dict "mcpKey" $name "releaseName" $.Release.Name) }}
+{{- if dig "create" false $sa }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $saName }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- $labels | nindent 4 }}
+  {{- with $sa.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- $labels | nindent 4 }}
+spec:
+  replicas: {{ dig "replicas" 1 $proxy }}
+  {{- with $proxy.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- $selector | nindent 6 }}
+  template:
+    metadata:
+      {{- with $proxy.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- $selector | nindent 8 }}
+        {{- with $proxy.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with (default $.Values.imagePullSecrets $proxy.imagePullSecrets) }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- /*
+      The ServiceAccount carries the Bedrock IAM role via IRSA -- the proxy has
+      no credentials of its own, so this reference is what makes signing work.
+      */}}
+      serviceAccountName: {{ required (printf "proxies.%s.serviceAccount.name is required (or set serviceAccount.create): the sigv4 proxy signs with the IAM role bound to its ServiceAccount via IRSA" $key) $saName }}
+      {{- with $proxy.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $proxy.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $proxy.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $proxy.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ dig "containerName" "proxy" $proxy }}
+          {{- with $proxy.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: {{ include "mcp-tools.mcpImage" (dict "mcp" $proxy "mcpKey" $key "section" "proxies") | quote }}
+          imagePullPolicy: {{ dig "image" "pullPolicy" "IfNotPresent" $proxy }}
+          args:
+            {{- if $proxy.args }}
+            {{- toYaml $proxy.args | nindent 12 }}
+            {{- else }}
+            {{- include "mcp-tools.proxyArgs" (dict "proxy" $proxy "proxyKey" $key) | nindent 12 }}
+            {{- end }}
+          {{- with $proxy.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if or $proxy.env $proxy.extraEnv }}
+          env:
+            {{- range $envKey, $envVal := (default dict $proxy.env) }}
+            - name: {{ $envKey }}
+              value: {{ $envVal | toString | quote }}
+            {{- end }}
+            {{- with $proxy.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+          {{- with $proxy.extraEnvFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ $port }}
+              protocol: TCP
+          {{- /*
+          TCP, not HTTP: every path on a signing proxy is forwarded upstream and
+          signed, so there is no local health endpoint to probe.
+          */}}
+          {{- if dig "enabled" false $probes }}
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: {{ dig "readiness" "initialDelaySeconds" 2 $probes }}
+            periodSeconds: {{ dig "readiness" "periodSeconds" 5 $probes }}
+            timeoutSeconds: {{ dig "readiness" "timeoutSeconds" 5 $probes }}
+            failureThreshold: {{ dig "readiness" "failureThreshold" 3 $probes }}
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: {{ dig "liveness" "initialDelaySeconds" 5 $probes }}
+            periodSeconds: {{ dig "liveness" "periodSeconds" 10 $probes }}
+            timeoutSeconds: {{ dig "liveness" "timeoutSeconds" 5 $probes }}
+            failureThreshold: {{ dig "liveness" "failureThreshold" 3 $probes }}
+          {{- end }}
+          {{- with $proxy.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with $proxy.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- $labels | nindent 4 }}
+  {{- with (dig "service" "annotations" dict $proxy) }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ dig "service" "type" "ClusterIP" $proxy }}
+  ports:
+    - port: {{ $port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- $selector | nindent 4 }}
+{{- end }}
+{{- end }}

@@ -30,7 +30,7 @@ server:
       nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 
     hosts:
-      - argoworkflows.tsgs.aws2.rafael.co.il
+      - argoworkflows.testmpr.aws2.rafael.co.il
 
     paths:
       - /
@@ -38,9 +38,9 @@ server:
     pathType: Prefix
 
     tls:
-      - secretName: tsgs-saas-aws-wildcard-cert
+      - secretName: testmpr-aws-wildcard-cert
         hosts:
-          - argoworkflows.tsgs.aws2.rafael.co.il
+          - argoworkflows.testmpr.aws2.rafael.co.il
 
 images:
   pullPolicy: IfNotPresent

@@ -6,6 +6,9 @@ workflow:
 
   rbac:
     create: true
+    serviceAccounts:
+      - name: argo-workflow
+        namespace: argo-workflow
 
 controller:
   workflowDefaults:

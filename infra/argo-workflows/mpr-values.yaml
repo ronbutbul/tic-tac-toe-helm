@@ -1,4 +1,4 @@
-singleNamespace: true
+
 workflow:
   serviceAccount:
     create: true

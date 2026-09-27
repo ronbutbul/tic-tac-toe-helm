@@ -385,6 +385,97 @@ mcps:
     extraEnv: []
     extraEnvFrom: []
     extraConfig: {}
+  # ============================================================================
+  # GITLAB MCP
+  # ============================================================================
+  gitlab-mcp:
+    enabled: true
+    replicas: 1
+
+    image:
+      registry: 941284018955.dkr.ecr.il-central-1.amazonaws.com
+      repository: gitlab-mcp-service
+      pullPolicy: Always
+      tag: "20260927-102642-ba944334"
+
+    service:
+      type: ClusterIP
+      port: 8000
+      annotations: {}
+
+    env:
+      GITLAB_URL: "https://gitlab.com"
+      # Refuse every write -- no pushes, MR merges or issue edits.
+      GITLAB_READ_ONLY: "true"
+      GITLAB_VERIFY_SSL: "false"
+      # Only set together with the volumeMount below: an unmounted path fails
+      # TLS instead of falling back to the system trust store.
+      # GITLAB_CA_BUNDLE: /etc/ssl/certs/gitlab-ca.crt
+      # Seconds. Keep under the RemoteMCPServer timeout so the MCP gives up first.
+      GITLAB_TIMEOUT: "30"
+      MCP_HOST: "0.0.0.0"
+      MCP_PORT: "8000"
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+    # Creates the <release>-gitlab-mcp Secret and wires it in via envFrom, which
+    # keeps the token out of the ConfigMap. It is still committed to the repo,
+    # so scope it to read_api on a single project or group rather than using a
+    # personal token, and rotate it in GitLab if this repo is shared.
+    secretData:
+      GITLAB_TOKEN: ""
+
+    serviceAccount:
+      create: true
+      annotations: {}
+
+    # RemoteMCPServer tuning. GitLab's API is slower than the other MCPs here,
+    # so timeout is raised from the 30s default.
+    timeout: 60s
+    # description: "gitlab-mcp MCP server"
+    # protocol: STREAMABLE_HTTP
+    # path: /mcp
+    # sseReadTimeout: 5m0s
+    # terminateOnClose: true
+
+    healthCheck:
+      enabled: false
+      path: /health
+
+    podSecurityContext: {}
+    securityContext: {}
+    tolerations: []
+    nodeSelector: {}
+    affinity: {}
+    podAnnotations: {}
+    podLabels: {}
+    volumes: []
+    volumeMounts: []
+    extraEnv: []
+    extraEnvFrom: []
+    extraConfig: {}
+
+    # Example: private CA for a self-hosted GitLab. Mount the bundle, then point
+    # GITLAB_CA_BUNDLE above at the mountPath.
+    # volumes:
+    #   - name: gitlab-ca
+    #     configMap:
+    #       name: gitlab-ca
+    #       items:
+    #         - key: ca.crt
+    #           path: gitlab-ca.crt
+    # volumeMounts:
+    #   - name: gitlab-ca
+    #     mountPath: /etc/ssl/certs/gitlab-ca.crt
+    #     subPath: gitlab-ca.crt
+    #     readOnly: true
+
 
 
 # ==============================================================================

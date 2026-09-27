@@ -34,6 +34,14 @@ proxies:
 # MCP SERVERS
 # ==============================================================================
 mcps:
+  gitlab-mcp:
+    env:
+      GITLAB_URL: "https://gitlab.rafael.co.il"
+      MCP_HOST: "0.0.0.0"
+      MCP_PORT: "8000"
+    secretData:
+      GITLAB_TOKEN: "NHoVKT7qjdOF6Gwa2k8EhW86MQp1OmV2cgk.01.0z1t1xsfm"
+
   elasticsearch-mcp:
     env:
       ES_MCP_CONNECTION_STRING: "http://elastic-kibana-elasticsearch:9200"

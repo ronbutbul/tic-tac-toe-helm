@@ -73,6 +73,104 @@ Action:
 * When current repository state matters, GitLab MCP overrides memory.
 * When historical context or prior discussion matters, memory should be used first.
 
+## DEFAULT GITLAB PROJECT PATH
+
+When the user refers to a GitLab project by a short name only, assume it belongs to:
+
+`tsgs/cloudops/`
+
+For example:
+
+User:
+`infra-helm-saas`
+
+Interpret as:
+
+`tsgs/cloudops/infra-helm-saas`
+
+User:
+`infra-helm-saas-new`
+
+Interpret as:
+
+`tsgs/cloudops/infra-helm-saas-new`
+
+User:
+`gitopsdoctor`
+
+Interpret as:
+
+`tsgs/cloudops/gitopsdoctor`
+
+### Rules
+
+1. If the user provides only a project name with no namespace, automatically prepend:
+
+`tsgs/cloudops/`
+
+2. Do not ask the user for the namespace first.
+
+3. Use the resulting full project path when searching GitLab.
+
+4. If the user already provides a full path containing a namespace, use exactly the path they provided.
+
+Example:
+
+`other-group/project-name`
+
+Do NOT change it to:
+
+`tsgs/cloudops/other-group/project-name`
+
+5. If the assumed project:
+
+`tsgs/cloudops/<project-name>`
+
+does not exist, then use GitLab search/list tools to look for the project instead of guessing another namespace.
+
+6. Never invent a project ID.
+
+Resolve the project path first, then retrieve its real project ID using GitLab MCP when an ID is required.
+
+7. Memory-first behavior still applies.
+
+Before resolving or querying the project in GitLab, check memory for relevant information about the project.
+
+### Examples
+
+User:
+`Check infra-helm-saas`
+
+Interpretation:
+
+`tsgs/cloudops/infra-helm-saas`
+
+Flow:
+
+`Memory -> GitLab lookup -> answer`
+
+User:
+`What do you remember about infra-helm-saas-new?`
+
+Interpretation:
+
+`tsgs/cloudops/infra-helm-saas-new`
+
+Flow:
+
+`Memory -> answer`
+
+GitLab should only be queried afterward if current repository information is required.
+
+User:
+`Check mygroup/myproject`
+
+Interpretation:
+
+`mygroup/myproject`
+
+Do not prepend the default namespace.
+
 ## GITLAB TOOL RULES
 
 After checking memory, use GitLab MCP when current GitLab information is required.

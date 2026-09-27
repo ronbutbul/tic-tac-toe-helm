@@ -20,9 +20,9 @@ imagePullSecrets: []
 # the Secret holding its API key). The key is the resource name, which is what
 # agents reference via agents.<agent>.modelConfig.
 modelConfigs:
-  vllm-gpt:
+  bedrock-guardrailed:
     enabled: true
-    # name: vllm-gpt          # defaults to the key above
+    # name: bedrock-guardrailed          # defaults to the key above
     provider: OpenAI
     model: /data/gpt-oss-20b
 
@@ -54,7 +54,7 @@ modelConfigs:
     # annotations: {}
     # extraSpec: {}           # raw passthrough for spec fields not modelled here
 
-  # Embedding model. Shares the vllm-dummy-key Secret created by vllm-gpt above,
+  # Embedding model. Shares the vllm-dummy-key Secret created by bedrock-guardrailed above,
   # so it deliberately does NOT set apiKeySecretData -- two blocks declaring the
   # same apiKeySecret would render two Secrets with the same name.
   vllm-emb:
@@ -495,7 +495,7 @@ agents:
     # annotations: {}
 
     # Long-term memory. modelConfigRef must name a ModelConfig backed by an
-    # EMBEDDING model -- vllm-emb, not vllm-gpt -- since it generates the
+    # EMBEDDING model -- vllm-emb, not bedrock-guardrailed -- since it generates the
     # memory vectors. Required by the CRD whenever memory is enabled.
     memory:
       enabled: true
@@ -513,7 +513,7 @@ agents:
       overlapSize: 2
       eventRetentionSize: 10
       summarizer:
-        modelConfig: vllm-gpt
+        modelConfig: bedrock-guardrailed
 
     deployment:
       labels:
@@ -533,7 +533,7 @@ agents:
       overlapSize: 2
       eventRetentionSize: 10
       summarizer:
-        modelConfig: vllm-gpt
+        modelConfig: bedrock-guardrailed
     deployment:
       labels:
         app.kubernetes.io/instance: agent
@@ -552,7 +552,28 @@ agents:
       overlapSize: 2
       eventRetentionSize: 10
       summarizer:
-        modelConfig: vllm-gpt
+        modelConfig: bedrock-guardrailed
+    deployment:
+      labels:
+        app.kubernetes.io/instance: agent
+
+  # Gated on mcps.gitlab-mcp.enabled as well, so it stays unrendered until the
+  # GitLab MCP is switched on. Tool list lives in templates/agents/gitlab-agent.yaml.
+  gitlab:
+    enabled: true
+    modelConfigRef: "bedrock-guardrailed"
+    stream: true
+    memory:
+      enabled: true
+      modelConfigRef: "vllm-emb"
+      ttlDays: 15
+    compaction:
+      compactionInterval: 5
+      tokenThreshold: 25000
+      overlapSize: 2
+      eventRetentionSize: 10
+      summarizer:
+        modelConfig: bedrock-guardrailed
     deployment:
       labels:
         app.kubernetes.io/instance: agent
@@ -577,4 +598,4 @@ agents:
     #   overlapSize: 2
     #   eventRetentionSize: 10
     #   summarizer:
-    #     modelConfig: vllm-gpt
+    #     modelConfig: bedrock-guardrailed

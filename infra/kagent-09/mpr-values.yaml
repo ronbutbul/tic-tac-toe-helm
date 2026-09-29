@@ -27,7 +27,7 @@ controller:
     
 k8s-agent:
   enabled: true
-  modelConfigRef: "vllm-gpt"
+  modelConfigRef: "bedrock-guardrailed"
   memory:
     enabled: true
     modelConfigRef: "vllm-emb"
@@ -38,7 +38,7 @@ k8s-agent:
     overlapSize: 2
     eventRetentionSize: 10
     summarizer:
-      modelConfig: vllm-gpt    
+      modelConfig: bedrock-guardrailed    
 # Only the Kubernetes agent for this first validation.
 
 cilium-policy-agent:

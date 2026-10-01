@@ -1,34 +1,31 @@
 # ==============================================================================
+# MPR ENVIRONMENT
+# ==============================================================================
+# Everything specific to this cluster and account: endpoints, credentials and
+# the guardrail. Structure, resources, probes, tool lists and agent wiring live
+# in values.yaml -- this file only states what differs here.
+
+# ==============================================================================
 # MODEL CONFIGS
 # ==============================================================================
 modelConfigs:
-
   bedrock-guardrailed:
-    enabled: true
-    provider: OpenAI
-    model: openai.gpt-oss-120b-1:0
-
-    apiKeySecret: vllm-dummy-key
-    apiKeySecretKey: OPENAI_API_KEY
-
+    # This account's guardrail. Provider, model and the proxy baseUrl come from
+    # values.yaml.
     defaultHeaders:
       X-Amzn-Bedrock-GuardrailIdentifier: "arn:aws:bedrock:eu-central-1:941284018955:guardrail/wrfcu805qvyf"
       X-Amzn-Bedrock-GuardrailVersion: "DRAFT"
-
-    providerConfig:
-      baseUrl: http://bedrock-sigv4-proxy.default.svc.cluster.local:8080/openai/v1
-
 
 
 # ==============================================================================
 # PROXIES
 # ==============================================================================
 # Signs Bedrock requests with the IAM role on the kagent-bedrock ServiceAccount
-# (IRSA). Everything else -- image, region, upstream host, stripped headers --
-# comes from the defaults in values.yaml; this only turns it on.
+# (IRSA). Image, region, upstream host and stripped headers come from values.yaml.
 proxies:
   bedrock-sigv4-proxy:
     enabled: true
+
 
 # ==============================================================================
 # MCP SERVERS
@@ -37,8 +34,9 @@ mcps:
   gitlab-mcp:
     env:
       GITLAB_URL: "https://gitlab.rafael.co.il"
-      MCP_HOST: "0.0.0.0"
-      MCP_PORT: "8000"
+    # Live credential committed to this repo: scope it to read_api on a single
+    # project or group rather than a personal token, and rotate it in GitLab if
+    # this repo is shared more widely.
     secretData:
       GITLAB_TOKEN: "NHoVKT7qjdOF6Gwa2k8EhW86MQp1OmV2cgk.01.0z1t1xsfm"
 
@@ -49,12 +47,8 @@ mcps:
   mongodb-mcp:
     env:
       MDB_MCP_CONNECTION_STRING: "mongodb://mongo8-primary:27017"
-      MCP_HOST: "0.0.0.0"
-      MCP_PORT: "8000"
 
   kafka-mcp:
     env:
       KAFKA_BOOTSTRAP_SERVERS: "bitnami-kafka:9092"
       KAFKA_ADMIN_SERVERS: "bitnami-kafka-controller-headless:9093"
-      MCP_HOST: "0.0.0.0"
-      MCP_PORT: "8000"

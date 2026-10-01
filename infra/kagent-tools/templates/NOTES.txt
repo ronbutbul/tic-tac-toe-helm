@@ -23,10 +23,11 @@ MCP servers:
 {{- end }}
 
 Agents:
-{{- range $key, $agent := .Values.agents }}
-{{- $mcpForAgent := dig (printf "%s-mcp" $key) dict (default dict $.Values.mcps) }}
-{{- if and $agent.enabled (or (not $mcpForAgent) (dig "enabled" false $mcpForAgent)) }}
-  - {{ default (printf "%s-agent" $key) $agent.name }} (prompt: agents-rules/{{ $key }}.md, model: {{ $agent.modelConfigRef | default $agent.modelConfig | default "vllm-gpt" }})
+{{- range $key, $override := .Values.agents }}
+{{- $agent := mergeOverwrite (deepCopy (default dict $.Values.agentDefaults)) (deepCopy $override) }}
+{{- $mcpForAgent := dig (dig "mcp" (printf "%s-mcp" $key) $agent) dict (default dict $.Values.mcps) }}
+{{- if and (dig "enabled" false $agent) (or (not $mcpForAgent) (dig "enabled" false $mcpForAgent)) }}
+  - {{ dig "name" (printf "%s-agent" $key) $agent }} (prompt: agents-rules/{{ $key }}.md, model: {{ $agent.modelConfigRef | default $agent.modelConfig | default $.Values.defaultModelConfig }})
 {{- end }}
 {{- end }}
 

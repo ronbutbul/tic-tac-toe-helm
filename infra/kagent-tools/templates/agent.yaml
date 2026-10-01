@@ -1,0 +1,80 @@
+{{- /*
+One Agent per key under .Values.agents. Adding an agent is a values entry plus
+agents-rules/<key>.md -- no template changes.
+
+Each agent is agentDefaults deep-merged with its own values, so the per-agent
+block only carries what differs.
+
+An agent's tools come from whichever of these its values describe:
+  - a backing MCP (agents.<key>.mcp, defaulting to "<key>-mcp") -> McpServer,
+    with the tool list from agents.<key>.toolNames
+  - agents.<key>.delegates                                      -> other Agents
+  - neither                                                     -> no tools
+An agent backed by an MCP renders only when that MCP is enabled too, so
+disabling an MCP cannot leave an Agent pointing at a RemoteMCPServer that is
+not there.
+*/}}
+{{- range $key, $override := .Values.agents }}
+{{- $agent := mergeOverwrite (deepCopy (default dict $.Values.agentDefaults)) (deepCopy $override) }}
+{{- $mcpKey := dig "mcp" (printf "%s-mcp" $key) $agent }}
+{{- $mcp := dig $mcpKey dict (default dict $.Values.mcps) }}
+{{- $hasMcp := not (empty $mcp) }}
+{{- if and (dig "enabled" false $agent) (or (not $hasMcp) (dig "enabled" false $mcp)) }}
+{{- $agentName := dig "name" (printf "%s-agent" $key) $agent }}
+{{- $delegates := default list $agent.delegates }}
+{{- if and $hasMcp (not $agent.toolNames) }}
+{{- fail (printf "agents.%s.toolNames is required: it is backed by MCP %q but lists no tools, so the agent would render with an empty tool list" $key $mcpKey) }}
+{{- end }}
+---
+apiVersion: kagent.dev/v1alpha2
+kind: Agent
+metadata:
+  name: {{ $agentName }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "mcp-tools.mcpLabels" (dict "chartName" $.Chart.Name "chartVersion" $.Chart.Version "mcpKey" $agentName "releaseName" $.Release.Name "releaseService" $.Release.Service) | nindent 4 }}
+  {{- with dig "annotations" dict $agent }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  description: {{ dig "description" (printf "%s agent" $key) $agent | quote }}
+  type: Declarative
+  declarative:
+    modelConfig: {{ $agent.modelConfigRef | default $agent.modelConfig | default $.Values.defaultModelConfig }}
+    {{- with $agent.runtime }}
+    runtime: {{ . }}
+    {{- end }}
+    stream: {{ dig "stream" true $agent }}
+    systemMessage: |-
+      {{- include "mcp-tools.agentSystemMessage" (dict "root" $ "agentKey" $key "indent" 6) }}
+    {{- if $hasMcp }}
+    tools:
+      - type: McpServer
+        mcpServer:
+          apiGroup: kagent.dev
+          kind: RemoteMCPServer
+          name: {{ include "mcp-tools.resourceName" (dict "releaseName" $.Release.Name "mcpKey" $mcpKey) }}
+          toolNames:
+            {{- toYaml $agent.toolNames | nindent 12 }}
+    {{- else if $delegates }}
+    {{- /* Referenced by bare name, so a delegate must live in this namespace. */}}
+    tools:
+      {{- range $delegate := $delegates }}
+      - type: Agent
+        agent:
+          name: {{ $delegate }}
+      {{- end }}
+    {{- end }}
+    {{- with (include "mcp-tools.agentMemory" (dict "agent" $agent "agentKey" $key)) }}
+    {{- . | nindent 4 }}
+    {{- end }}
+    {{- with (include "mcp-tools.agentContext" (dict "agent" $agent "agentKey" $key)) }}
+    {{- . | nindent 4 }}
+    {{- end }}
+    {{- with dig "deployment" dict $agent }}
+    deployment:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+{{- end }}
+{{- end }}

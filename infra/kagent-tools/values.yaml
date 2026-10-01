@@ -13,6 +13,11 @@ imagePullSecrets: []
 # - name: my-registry-creds
 
 
+# ModelConfig an agent uses when its block names none. Must match a key under
+# modelConfigs below; it is the single place the fallback is written down.
+defaultModelConfig: bedrock-guardrailed
+
+
 # ==============================================================================
 # MODEL CONFIGS
 # ==============================================================================
@@ -24,7 +29,7 @@ modelConfigs:
     enabled: true
     # name: bedrock-guardrailed          # defaults to the key above
     provider: OpenAI
-    model: /data/gpt-oss-20b
+    model: openai.gpt-oss-120b-1:0
 
     # Secret holding the API key, and the key inside it.
     apiKeySecret: vllm-dummy-key
@@ -45,7 +50,7 @@ modelConfigs:
     # Rendered under the provider-specific field -- OpenAI -> openAI,
     # AzureOpenAI -> azureOpenAI, Anthropic -> anthropic, and so on.
     providerConfig:
-      baseUrl: http://vllm-llama3-engine-service/v1
+      baseUrl: http://bedrock-sigv4-proxy.default.svc.cluster.local:8080/openai/v1
       # temperature: "0.7"
       # maxTokens: 4096
 
@@ -66,6 +71,7 @@ modelConfigs:
     apiKeySecretKey: OPENAI_API_KEY
 
     providerConfig:
+      # Cluster-specific -- override in the environment values file.
       baseUrl: http://vllm-emb-embedding-engine-service.default.svc.cluster.local/v1
 
 
@@ -196,8 +202,9 @@ mcps:
       annotations: {}
 
     # Environment variables injected via ConfigMap
-    env:
-      ES_MCP_CONNECTION_STRING: "http://elastic-kibana-elasticsearch:9200"
+    # Endpoint is environment-specific -- set it in the environment values file.
+    # env:
+    #   ES_MCP_CONNECTION_STRING: "http://elasticsearch:9200"
 
     resources:
       requests:
@@ -230,19 +237,6 @@ mcps:
       path: /health
       # readiness: { initialDelaySeconds: 10, periodSeconds: 10, timeoutSeconds: 5, failureThreshold: 3 }
       # liveness:  { initialDelaySeconds: 30, periodSeconds: 30, timeoutSeconds: 5, failureThreshold: 3 }
-
-    podSecurityContext: {}
-    securityContext: {}
-    tolerations: []
-    nodeSelector: {}
-    affinity: {}
-    podAnnotations: {}
-    podLabels: {}
-    volumes: []
-    volumeMounts: []
-    extraEnv: []
-    extraEnvFrom: []
-    extraConfig: {}
 
     # Example: mounting a custom CA bundle
     # volumes:
@@ -300,10 +294,11 @@ mcps:
       annotations: {}
 
     env:
-      KAFKA_BOOTSTRAP_SERVERS: "http://localhost:9092"
-      KAFKA_ADMIN_SERVERS: "http://localhost:9093"
       MCP_HOST: "0.0.0.0"
       MCP_PORT: "8000"
+      # Brokers are environment-specific -- set them in the environment values file.
+      # KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+      # KAFKA_ADMIN_SERVERS: "kafka-controller-headless:9093"
 
     resources:
       requests:
@@ -321,18 +316,6 @@ mcps:
       enabled: false
       path: /health
 
-    podSecurityContext: {}
-    securityContext: {}
-    tolerations: []
-    nodeSelector: {}
-    affinity: {}
-    podAnnotations: {}
-    podLabels: {}
-    volumes: []
-    volumeMounts: []
-    extraEnv: []
-    extraEnvFrom: []
-    extraConfig: {}
 
   # ============================================================================
   # MONGODB MCP
@@ -353,9 +336,10 @@ mcps:
       annotations: {}
 
     env:
-      MDB_MCP_CONNECTION_STRING: "mongodb://mongo8-primary:27017"
       MCP_HOST: "0.0.0.0"
       MCP_PORT: "8000"
+      # Connection string is environment-specific -- set it in the environment values file.
+      # MDB_MCP_CONNECTION_STRING: "mongodb://mongo:27017"
 
     resources:
       requests:
@@ -373,18 +357,6 @@ mcps:
       enabled: false
       path: /health
 
-    podSecurityContext: {}
-    securityContext: {}
-    tolerations: []
-    nodeSelector: {}
-    affinity: {}
-    podAnnotations: {}
-    podLabels: {}
-    volumes: []
-    volumeMounts: []
-    extraEnv: []
-    extraEnvFrom: []
-    extraConfig: {}
   # ============================================================================
   # GITLAB MCP
   # ============================================================================
@@ -404,7 +376,8 @@ mcps:
       annotations: {}
 
     env:
-      GITLAB_URL: "https://gitlab.com"
+      # Instance URL is environment-specific -- set it in the environment values file.
+      # GITLAB_URL: "https://gitlab.example.com"
       # Refuse every write -- no pushes, MR merges or issue edits.
       GITLAB_READ_ONLY: "true"
       GITLAB_VERIFY_SSL: "false"
@@ -428,8 +401,10 @@ mcps:
     # keeps the token out of the ConfigMap. It is still committed to the repo,
     # so scope it to read_api on a single project or group rather than using a
     # personal token, and rotate it in GitLab if this repo is shared.
-    secretData:
-      GITLAB_TOKEN: ""
+    # Set GITLAB_TOKEN in the environment values file, never here -- a credential
+    # in chart defaults applies to every environment that installs this chart.
+    # secretData:
+    #   GITLAB_TOKEN: "glpat-xxxxxxxxxxxx"
 
     serviceAccount:
       create: true
@@ -447,19 +422,6 @@ mcps:
     healthCheck:
       enabled: false
       path: /health
-
-    podSecurityContext: {}
-    securityContext: {}
-    tolerations: []
-    nodeSelector: {}
-    affinity: {}
-    podAnnotations: {}
-    podLabels: {}
-    volumes: []
-    volumeMounts: []
-    extraEnv: []
-    extraEnvFrom: []
-    extraConfig: {}
 
     # Example: private CA for a self-hosted GitLab. Mount the bundle, then point
     # GITLAB_CA_BUNDLE above at the mountPath.
@@ -481,149 +443,146 @@ mcps:
 # ==============================================================================
 # AGENTS
 # ==============================================================================
-# One template per agent under templates/agents/. Each agent's systemMessage is
-# read from agents-rules/<key>.md -- edit the prompt there, not in the template.
-# An agent only renders when both it and its backing MCP are enabled.
+# Every agent is agentDefaults deep-merged with its own block below, so each
+# agent only states what differs. Its systemMessage comes from
+# agents-rules/<key>.md -- edit the prompt there, not in values.
+#
+# Adding an agent: write agents-rules/<key>.md, add a block here. That is all;
+# there is no per-agent template.
+#
+# An agent is backed by the MCP named "<key>-mcp" when one exists (override with
+# "mcp:"), and renders only when that MCP is enabled too. Set "delegates:" for an
+# orchestrator whose tools are other agents, or neither for a standalone agent.
+agentDefaults:
+  stream: true
+  memory:
+    enabled: true
+    # Must name a ModelConfig backed by an EMBEDDING model -- it generates the
+    # memory vectors. Required by the CRD whenever memory is enabled.
+    modelConfigRef: "vllm-emb"
+    ttlDays: 15
+  # Event-history compaction -> spec.declarative.context.compaction. Keys left
+  # out fall through to the CRD's own defaults (compactionInterval 5,
+  # overlapSize 2). Set "enabled: false" on an agent to switch it off.
+  compaction:
+    compactionInterval: 5
+    tokenThreshold: 25000
+    overlapSize: 2
+    eventRetentionSize: 10
+    summarizer:
+      modelConfig: bedrock-guardrailed
+  deployment:
+    labels:
+      app.kubernetes.io/instance: agent
+
 agents:
   elasticsearch:
     enabled: true
-    modelConfigRef: "bedrock-guardrailed"
-    stream: true
-    # name: elasticsearch-agent
-    # description: "..."                # defaults live in the template
-    # toolNames: []                     # overrides the template's default list
-    # annotations: {}
-
-    # Long-term memory. modelConfigRef must name a ModelConfig backed by an
-    # EMBEDDING model -- vllm-emb, not bedrock-guardrailed -- since it generates the
-    # memory vectors. Required by the CRD whenever memory is enabled.
-    memory:
-      enabled: true
-      modelConfigRef: "vllm-emb"
-      ttlDays: 15
-
-    # Event-history compaction -> spec.declarative.context.compaction.
-    # Uncomment to enable: presence of the block is the switch (add
-    # "enabled: false" to turn it off without deleting the settings).
-    # Keys left out fall through to the CRD's own defaults
-    # (compactionInterval 5, overlapSize 2).
-    compaction:
-      compactionInterval: 5
-      tokenThreshold: 25000
-      overlapSize: 2
-      eventRetentionSize: 10
-      summarizer:
-        modelConfig: bedrock-guardrailed
-
-    deployment:
-      labels:
-        app.kubernetes.io/instance: agent
+    description: "Elasticsearch / Kubernetes logs assistant for analyzing info, debug, and error logs and troubleshooting crashes (via MCP)"
+    toolNames:
+      - list-indices
+      - search
+      - count
+      - get-document
+      - index-mappings
+      - index-stats
+      - cluster-health
+      - cluster-stats
+      - switch-connection
 
   kafka:
     enabled: true
-    modelConfigRef: "bedrock-guardrailed"
-    stream: true
-    memory:
-      enabled: true
-      modelConfigRef: "vllm-emb"
-      ttlDays: 15
-    compaction:
-      compactionInterval: 5
-      tokenThreshold: 25000
-      overlapSize: 2
-      eventRetentionSize: 10
-      summarizer:
-        modelConfig: bedrock-guardrailed
-    deployment:
-      labels:
-        app.kubernetes.io/instance: agent
+    description: "Kafka assistant agent (via MCP)"
+    toolNames:
+      - list-topics
+      - describe-topic
+      - create-topic
+      - delete-topic
+      - produce-message
+      - consume-messages
+      - list-broker
+      - list-consumer
+      - describe-consumer-group
 
   mongodb:
     enabled: true
-    modelConfigRef: "bedrock-guardrailed"
-    stream: true
-    memory:
-      enabled: true
-      modelConfigRef: "vllm-emb"
-      ttlDays: 15
-    compaction:
-      compactionInterval: 5
-      tokenThreshold: 25000
-      overlapSize: 2
-      eventRetentionSize: 10
-      summarizer:
-        modelConfig: bedrock-guardrailed
-    deployment:
-      labels:
-        app.kubernetes.io/instance: agent
+    description: "MongoDB assistant agent (via MCP)"
+    toolNames:
+      - list-databases
+      - list-collections
+      - db-stats
+      - collection-schema
+      - find
+      - aggregate
+      - count
+      - collection-indexes
+      - mongodb-logs
+      - switch-connection
+      - drop-collection
+      - create-collection
 
-  # Gated on mcps.gitlab-mcp.enabled as well, so it stays unrendered until the
-  # GitLab MCP is switched on. Tool list lives in templates/agents/gitlab-agent.yaml.
   gitlab:
     enabled: true
-    modelConfigRef: "bedrock-guardrailed"
-    stream: true
-    memory:
-      enabled: true
-      modelConfigRef: "vllm-emb"
-      ttlDays: 15
-    compaction:
-      compactionInterval: 5
-      tokenThreshold: 25000
-      overlapSize: 2
-      eventRetentionSize: 10
-      summarizer:
-        modelConfig: bedrock-guardrailed
-    deployment:
-      labels:
-        app.kubernetes.io/instance: agent
+    description: "GitLab assistant agent (via MCP)"
+    # Every tool here is read-only, matching mcps.gitlab-mcp.env.GITLAB_READ_ONLY.
+    # Setting that to "false" exposes write tools, but they still have to be
+    # listed here before the agent can call them.
+    toolNames:
+      - compare-refs
+      - get-branch
+      - get-commit
+      - get-commit-diff
+      - get-current-user
+      - get-file-contents
+      - get-group
+      - get-issue
+      - get-job
+      - get-job-log
+      - get-merge-request
+      - get-merge-request-diffs
+      - get-pipeline
+      - get-project
+      - get-repository-tree
+      - list-branches
+      - list-commits
+      - list-group-projects
+      - list-groups
+      - list-issue-notes
+      - list-issues
+      - list-labels
+      - list-merge-request-notes
+      - list-merge-requests
+      - list-milestones
+      - list-pipeline-jobs
+      - list-pipelines
+      - list-project-members
+      - list-projects
+      - list-tags
+      - list-users
+      - search
 
-  # Orchestrator. Its tools are the agents listed in delegates, so it is not
-  # gated on an MCP. Each delegate must already exist in the release namespace:
-  # gitlab-agent comes from this chart, k8s-agent ships with kagent.
-  # agents-rules/main.md describes the same list in prose -- keep them in sync.
+  # Orchestrator: its tools are other agents, so it has no backing MCP. Each
+  # delegate must already exist in the release namespace -- gitlab-agent comes
+  # from this chart, k8s-agent ships with kagent. agents-rules/main.md names the
+  # same agents in prose; keep the two in sync.
   main:
     enabled: true
-    modelConfigRef: "bedrock-guardrailed"
-    stream: true
+    description: "Main orchestration agent that delegates tasks to specialized agents."
     delegates:
       - gitlab-agent
       - k8s-agent
-    # name: main-agent
-    # description: "..."                # default lives in the template
     memory:
       enabled: false
-      modelConfigRef: "vllm-emb"
-      ttlDays: 15
-    compaction:
-      compactionInterval: 5
-      tokenThreshold: 25000
-      overlapSize: 2
-      eventRetentionSize: 10
-      summarizer:
-        modelConfig: bedrock-guardrailed
-    deployment:
-      labels:
-        app.kubernetes.io/instance: agent
 
-  # Standalone assistant -- no MCP and no tools, so it is not gated on an MCP.
+  # Standalone assistant: no MCP and no delegates, so it renders with no tools.
   # Named "test" rather than "test-agent" to match the resource already in the
-  # cluster; prompt lives in agents-rules/test.md.
+  # cluster.
   test:
     enabled: true
     name: test
     description: "ema shelha begeces"
-    modelConfigRef: "bedrock-guardrailed"
     runtime: python
-    stream: true
     memory:
       enabled: false
-      modelConfigRef: "vllm-emb"
-      ttlDays: 15
-    # compaction:
-    #   compactionInterval: 5
-    #   tokenThreshold: 25000
-    #   overlapSize: 2
-    #   eventRetentionSize: 10
-    #   summarizer:
-    #     modelConfig: bedrock-guardrailed
+    compaction:
+      enabled: false

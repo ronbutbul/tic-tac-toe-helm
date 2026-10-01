@@ -568,9 +568,18 @@ agents:
   main:
     enabled: true
     description: "Main orchestration agent that delegates tasks to specialized agents."
+    # A delegate is a bare name, or a map that may also set namespace and
+    # isolateSessions (a fresh sub-agent session per call, for safe parallel
+    # fan-out). isolateSessions is NOT in the kagent 0.9.12 CRD installed here:
+    # the API rejects the whole Agent with a strict decoding error, so it stays
+    # off until kagent is upgraded.
     delegates:
       - gitlab-agent
       - k8s-agent
+      # - name: gitlab-agent
+      #   isolateSessions: true
+      # - name: k8s-agent
+      #   isolateSessions: true
     memory:
       enabled: false
 

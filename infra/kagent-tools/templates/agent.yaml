@@ -58,12 +58,30 @@ spec:
           toolNames:
             {{- toYaml $agent.toolNames | nindent 12 }}
     {{- else if $delegates }}
-    {{- /* Referenced by bare name, so a delegate must live in this namespace. */}}
+    {{- /*
+    A delegate is either a bare name (same namespace) or a map, which may also
+    carry namespace and isolateSessions:
+      delegates:
+        - gitlab-agent
+        - name: k8s-agent
+          namespace: kagent
+          isolateSessions: true
+    isolateSessions is emitted only when the values set it: it is absent from
+    the kagent 0.9.12 CRD, whose API rejects the whole Agent with a strict
+    decoding error rather than ignoring the field.
+    */}}
     tools:
       {{- range $delegate := $delegates }}
+      {{- $d := ternary (dict "name" $delegate) $delegate (kindIs "string" $delegate) }}
       - type: Agent
         agent:
-          name: {{ $delegate }}
+          name: {{ required (printf "agents.%s.delegates: every delegate needs a name" $key) $d.name }}
+          {{- with $d.namespace }}
+          namespace: {{ . }}
+          {{- end }}
+        {{- if hasKey $d "isolateSessions" }}
+        isolateSessions: {{ $d.isolateSessions }}
+        {{- end }}
       {{- end }}
     {{- end }}
     {{- with (include "mcp-tools.agentMemory" (dict "agent" $agent "agentKey" $key)) }}
